@@ -26,3 +26,6 @@ def init_project(name: str, parent: Path) -> None:
     config = DEFAULT_CONFIG.copy()
     config["project"] = {"name": name, "created": None}
     (project_dir / "project.yaml").write_text(yaml.dump(config, sort_keys=False))
+
+    for d in config["structure"]["directories"]:
+        (project_dir / d).mkdir()

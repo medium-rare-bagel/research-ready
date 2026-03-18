@@ -5,6 +5,7 @@ description = "CLI tool for scaffolding and managing research project workspaces
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "click>=8.3.1",
     "pyyaml>=6.0.3",
 ]
 

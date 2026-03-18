@@ -1,7 +1,7 @@
 # rr — Handoff
 
 ## Last Updated
-2026-03-18 — `rr init` subcommand wired and tested end-to-end.
+2026-03-18 — `rr reindex` built and wired as CLI subcommand.
 
 ## What's Done
 - **Project scaffolding** — `pyproject.toml` (src layout, `rr` entry point), Python 3.12 pinned, `pyyaml`+`click` runtime deps, `pytest` dev dep
@@ -11,11 +11,13 @@
 - **`src/rr/file.py`** — `file_asset(src, new_name, dest_dir, ...)`: moves file, updates index.json, regenerates index.md, git commits. Optional params: `index_path`, `index_md_path`, `description`, `project_root`, `allowed_dirs`. (7/7 tests passing)
 - **`src/rr/config.py`** — `find_project_root(cwd)` walks up from cwd looking for `project.yaml`; `load_config(project_root)` parses it (3/3 tests passing)
 - **`src/rr/names.py`** — `suggest_filename(original, date)`: inserts `YYYY-MM-DD` before extension; handles multiple dots and no extension (3/3 tests passing)
-- **`src/rr/cli.py`** — `ProjectContext` dataclass, `cli` Click group with `--verbose/-v` flag, `require_project` helper, `rr file` subcommand, `rr init` subcommand (13/13 CLI tests passing)
-- **40 tests passing total**
+- **`src/rr/reindex.py`** — `reindex(project_root, config, ...)`: scans tracked_dirs, diffs against index.json, adds/removes entries, preserves metadata, skips dotfiles, creates missing dirs, commits only when git has actual changes (12/12 tests passing)
+- **`src/rr/git.py`** — added `git_has_changes(path)` helper
+- **`src/rr/cli.py`** — `ProjectContext` dataclass, `cli` Click group with `--verbose/-v` flag, `require_project` helper, `rr file`, `rr init`, `rr reindex` subcommands (16/16 CLI tests passing)
+- **55 tests passing total**
 
 ## What's Next
-- Wire `rr reindex` as a subcommand
+- Wire `rr remove` as a subcommand
 
 ## Decisions Made (Not Yet in Spec)
 - Git operations use `subprocess` (not GitPython or similar) — lightweight, no extra dep

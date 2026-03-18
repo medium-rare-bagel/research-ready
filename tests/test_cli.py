@@ -112,6 +112,32 @@ def test_require_project_returns_context_inside_project(tmp_path, monkeypatch, r
         cli.commands.pop("_dummy_req_ok", None)
 
 
+def test_reindex_outside_project_shows_error(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["reindex"])
+    assert result.exit_code != 0
+    assert "not inside an rr project" in result.output
+
+
+def test_reindex_prints_summary(tmp_path, monkeypatch, runner):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    (project_root / "sources" / "paper.pdf").write_bytes(b"%PDF")
+    monkeypatch.chdir(project_root)
+    result = runner.invoke(cli, ["reindex"], catch_exceptions=False)
+    assert result.exit_code == 0
+    assert "paper.pdf" in result.output
+
+
+def test_reindex_nothing_changed_prints_clean(tmp_path, monkeypatch, runner):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    monkeypatch.chdir(project_root)
+    result = runner.invoke(cli, ["reindex"], catch_exceptions=False)
+    assert result.exit_code == 0
+    assert "Nothing changed" in result.output
+
+
 def test_file_command_moves_and_indexes(tmp_path, monkeypatch):
     init_project("test-proj", tmp_path)
     project_root = tmp_path / "test-proj"

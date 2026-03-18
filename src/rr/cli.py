@@ -9,6 +9,7 @@ from rr.config import find_project_root, load_config
 from rr.file import file_asset
 from rr.init import init_project
 from rr.names import suggest_filename
+from rr.reindex import reindex
 
 
 @dataclass
@@ -48,6 +49,24 @@ def init_cmd(ctx: click.Context, project_name: str) -> None:
         ctx.exit(1)
         return
     click.echo(f"Initialized project: {project_name}")
+
+
+@cli.command("reindex")
+@click.pass_context
+def reindex_cmd(ctx: click.Context) -> None:
+    project = require_project(ctx)
+    result = reindex(project.root, project.config)
+    if not result["added"] and not result["removed"]:
+        click.echo("Nothing changed.")
+        return
+    if result["added"]:
+        click.echo(f"Added: {', '.join(result['added'])}")
+    if result["removed"]:
+        click.echo(f"Removed: {', '.join(result['removed'])}")
+    click.echo(
+        f"+{len(result['added'])} added, -{len(result['removed'])} removed, "
+        f"{result['unchanged']} unchanged"
+    )
 
 
 @cli.command("file")

@@ -170,6 +170,25 @@ def test_file_command_moves_and_indexes(tmp_path, monkeypatch):
     assert "test-2026-03-18.png" in log
 
 
+def test_file_command_preserves_extension_when_user_omits_it(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "inbox" / "report.pdf"
+    src.write_bytes(b"%PDF")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["file", "inbox/report.pdf"],
+        input="report\nsources\n\n",
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+    assert (project_root / "sources" / "report.pdf").exists()
+
+
 def test_init_no_argument_shows_error(tmp_path, monkeypatch, runner):
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(cli, ["init"])

@@ -80,6 +80,8 @@ def file_cmd(ctx: click.Context, src: Path) -> None:
     default_name = suggest_filename(src.name, date.today())
 
     new_name = click.prompt("New name", default=default_name)
+    if not Path(new_name).suffix and src.suffix:
+        new_name = new_name + src.suffix
     dest_dir_name = click.prompt("Destination directory", default="sources")
     description = click.prompt("Description", default="")
 

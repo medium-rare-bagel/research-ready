@@ -57,7 +57,8 @@ Tests go in `tests/`. Source code goes in `src/rr/`.
 - No unnecessary abstractions. Prefer simple functions over class hierarchies.
 - Use `pathlib.Path` for all filesystem operations.
 - YAML parsing via `pyyaml` or `ruamel.yaml`.
-- CLI framework: decided during implementation (click or typer).
+- CLI framework: Click. Explicit, well-documented, handles interactive prompts cleanly.
+- Logging: use `logging.getLogger(__name__)` in each module. INFO for user-facing confirmations, DEBUG for internals. See SPEC.md Logging section for details.
 
 ## Build Order
 1. `rr init` — scaffold a project
@@ -99,3 +100,49 @@ rr/
 - **Flat structure:** One level of subdirectories. No nesting.
 - **Obsidian-friendly:** Generated `index.md` uses standard markdown links. Projects can live inside or be symlinked into an Obsidian vault.
 - **Separation of concerns:** Keep index operations (`index.py`) separate from filesystem operations (`file.py`). The index should not assume files are local — future versions may track remote files (e.g., Google Drive).
+
+## Session Workflow
+
+### Starting a new session
+
+At the start of every new conversation or context reset:
+
+1. **Read HANDOFF.md** — know where we left off, what's done, what's next.
+2. **Quick spec check** — scan SPEC.md against what's been built. Flag anything that's drifted: implementation that doesn't match the spec, or spec sections that need updating based on what we learned building. Don't do a deep audit — just note anything that looks off and mention it before continuing.
+3. **Pick up the next task** from the build order or from HANDOFF.md's "what's next" section.
+
+### Ending a session
+
+Before the conversation ends or context gets long:
+
+1. **Update HANDOFF.md** with:
+   - What was built or changed this session
+   - Current state of tests (what passes, what's pending)
+   - What's next in the build order
+   - Any design decisions made that aren't yet in SPEC.md
+   - Any open questions or problems encountered
+2. **Update SPEC.md** if any design decisions were made during the session that change the spec.
+3. **Commit both files.**
+
+### HANDOFF.md format
+
+Keep it short and current. It's not a changelog — it's a snapshot of "right now."
+
+```markdown
+# rr — Handoff
+
+## Last Updated
+[date and brief context]
+
+## What's Done
+- [completed features with test status]
+
+## What's Next
+- [next task in build order]
+
+## Decisions Made (Not Yet in Spec)
+- [anything agreed on but not yet written into SPEC.md]
+
+## Open Issues
+- [problems, questions, things to revisit]
+```

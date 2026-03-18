@@ -144,6 +144,48 @@ def test_file_command_moves_and_indexes(tmp_path, monkeypatch):
     assert "test-2026-03-18.png" in log
 
 
+def test_init_no_argument_shows_error(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["init"])
+    assert result.exit_code != 0
+
+
+def test_init_creates_project_directory(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["init", "my-project"], catch_exceptions=False)
+    assert result.exit_code == 0
+    assert (tmp_path / "my-project").is_dir()
+
+
+def test_init_prints_confirmation(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["init", "my-project"], catch_exceptions=False)
+    assert "my-project" in result.output
+
+
+def test_init_fails_if_directory_exists(tmp_path, monkeypatch, runner):
+    (tmp_path / "my-project").mkdir()
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["init", "my-project"])
+    assert result.exit_code != 0
+    assert "already exists" in result.output
+
+
+def test_init_creates_scaffolding(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(cli, ["init", "my-project"], catch_exceptions=False)
+    project = tmp_path / "my-project"
+    assert (project / "project.yaml").exists()
+    assert (project / "index.json").exists()
+    assert (project / "sources").is_dir()
+
+
+def test_init_works_outside_project(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["init", "new-project"], catch_exceptions=False)
+    assert result.exit_code == 0
+
+
 def test_file_command_uses_default_name_when_accepted(tmp_path, monkeypatch):
     init_project("test-proj", tmp_path)
     project_root = tmp_path / "test-proj"

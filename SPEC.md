@@ -28,12 +28,12 @@ Creates a new research project directory.
 
 **What it does:**
 1. Creates the project directory named `<project-name>`
-2. Initializes `uv` inside the directory (Python project with pyproject.toml)
-3. Initializes a git repository
-4. Creates the directory structure defined in `project.yaml`
-5. Generates `project.yaml` with default configuration
-6. Generates `CLAUDE.md` tailored to the project
-7. Generates an empty `index.md`
+2. Initializes a git repository
+3. Creates the directory structure defined in `project.yaml`
+4. Generates `project.yaml` with default configuration
+5. Generates `CLAUDE.md` tailored to the project
+6. Generates an empty `index.json` (empty files array)
+7. Generates `index.md` from `index.json` (table headers, no rows)
 8. Creates a `.gitignore` (Python defaults + OS files)
 9. Makes an initial git commit ("Initialize project: <project-name>")
 
@@ -43,7 +43,8 @@ Creates a new research project directory.
 <project-name>/
 ├── project.yaml          # Project configuration
 ├── CLAUDE.md             # Claude Code context file
-├── index.md              # Asset index
+├── index.json            # Asset index (source of truth)
+├── index.md              # Asset index (generated view)
 ├── .gitignore
 ├── inbox/                # Holding pen for unfiled materials
 ├── sources/              # Filed, named research materials
@@ -56,6 +57,9 @@ Creates a new research project directory.
 **Options:**
 - `--config <path>`: Use a custom project.yaml template instead of the default
 - `--no-git`: Skip git initialization (for edge cases)
+
+**Global option (available on all commands):**
+- `--verbose` / `-v`: Show debug-level log output
 
 ### `rr file <path-to-file>`
 
@@ -253,12 +257,42 @@ This project was scaffolded with `rr`. Available commands:
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | Language | Python 3.12+ | User preference, ecosystem fit |
-| Package manager | uv | User preference, modern Python tooling |
-| CLI framework | TBD (click or typer) | To be decided during implementation |
+| Package manager | uv | User preference, modern Python tooling. `uv` is used to develop and run `rr` itself; projects created by `rr init` are research workspaces, not Python packages. |
+| CLI framework | Click | Explicit control over prompts and options; well-documented; no magic. `rr file` needs interactive prompting that Click handles cleanly. |
 | Config format | YAML | Human-editable, widely understood |
 | Index format | JSON (source of truth) + Markdown (generated view) | JSON for reliable parsing and extensibility; Markdown for human/Obsidian readability |
 | VCS | Git (auto-commit) | Audit trail, recovery, provenance |
 | Testing | pytest + red/green TDD | Spec-driven, tests written first |
+| Logging | Python `logging` module | Lightweight, debuggable, no external deps |
+
+---
+
+## Logging
+
+The tool uses Python's built-in `logging` module. The goal is not comprehensive observability — it's "enough that Claude Code can help debug a problem from the log output."
+
+**Two audiences, two levels:**
+
+- **User-facing feedback** (`INFO`): What the tool did. Printed to stdout during normal operation. Examples: "✓ Created project directory", "✓ Index updated", "✓ Committed: File: report.pdf → sources/".
+- **Debug detail** (`DEBUG`): What the tool is doing internally. Hidden by default, visible with `--verbose` flag. Examples: "Reading project.yaml from /path/to/project.yaml", "Parsing index.json: found 12 entries", "Git commit SHA: a3f2b1c".
+
+**Implementation:**
+
+- Each module gets its own logger: `logger = logging.getLogger(__name__)`
+- Default level is `INFO` — user sees confirmations and errors
+- `--verbose` flag on any command sets level to `DEBUG`
+- Log format is simple: just the message for INFO, timestamp + module + message for DEBUG
+- No log files. Everything goes to stderr (so stdout stays clean for any future piped output)
+
+**What to log at DEBUG level:**
+- Config file reads/writes (path, key values)
+- Index operations (entries added, removed, preserved during reindex)
+- Git operations (commands run, commit SHAs)
+- File operations (source path, destination path, sizes)
+
+**What NOT to log:**
+- File contents
+- Anything that would clutter the output during normal use
 
 ---
 
@@ -290,10 +324,8 @@ This project was scaffolded with `rr`. Available commands:
 
 ## Open Questions (To Resolve During Implementation)
 
-1. **CLI framework:** `click` vs `typer`. Typer is more modern and uses type hints, but click is more established. Decide during scaffolding.
-2. **Index parsing/writing:** Hand-roll markdown table parsing or use a small library? Probably hand-roll — the format is simple and we avoid a dependency.
-3. **File naming conventions:** Should `rr file` enforce any naming pattern (e.g., date prefix)? Current spec: suggest but don't enforce.
-4. **Inbox cleanup:** Should `rr file` warn if inbox is getting large? Nice-to-have, not MVP.
+1. **File naming conventions:** Should `rr file` enforce any naming pattern (e.g., date prefix)? Current spec: suggest but don't enforce.
+2. **Inbox cleanup:** Should `rr file` warn if inbox is getting large? Nice-to-have, not MVP.
 
 ## Future: Google Drive Integration
 

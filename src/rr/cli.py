@@ -7,6 +7,7 @@ import click
 
 from rr.config import find_project_root, load_config
 from rr.file import file_asset
+from rr.init import init_project
 from rr.names import suggest_filename
 
 
@@ -34,6 +35,19 @@ def require_project(ctx: click.Context) -> ProjectContext:
         click.echo("Error: not inside an rr project (no project.yaml found)")
         ctx.exit(1)
     return ctx.obj
+
+
+@cli.command("init")
+@click.argument("project_name")
+@click.pass_context
+def init_cmd(ctx: click.Context, project_name: str) -> None:
+    try:
+        init_project(project_name, Path.cwd())
+    except FileExistsError:
+        click.echo(f"Error: '{project_name}' already exists")
+        ctx.exit(1)
+        return
+    click.echo(f"Initialized project: {project_name}")
 
 
 @cli.command("file")

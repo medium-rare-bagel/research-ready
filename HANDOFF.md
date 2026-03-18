@@ -1,7 +1,7 @@
 # rr — Handoff
 
 ## Last Updated
-2026-03-18 — `rr file` subcommand wired and tested end-to-end.
+2026-03-18 — `rr init` subcommand wired and tested end-to-end.
 
 ## What's Done
 - **Project scaffolding** — `pyproject.toml` (src layout, `rr` entry point), Python 3.12 pinned, `pyyaml`+`click` runtime deps, `pytest` dev dep
@@ -11,11 +11,10 @@
 - **`src/rr/file.py`** — `file_asset(src, new_name, dest_dir, ...)`: moves file, updates index.json, regenerates index.md, git commits. Optional params: `index_path`, `index_md_path`, `description`, `project_root`, `allowed_dirs`. (7/7 tests passing)
 - **`src/rr/config.py`** — `find_project_root(cwd)` walks up from cwd looking for `project.yaml`; `load_config(project_root)` parses it (3/3 tests passing)
 - **`src/rr/names.py`** — `suggest_filename(original, date)`: inserts `YYYY-MM-DD` before extension; handles multiple dots and no extension (3/3 tests passing)
-- **`src/rr/cli.py`** — `ProjectContext` dataclass, `cli` Click group with `--verbose/-v` flag, `require_project` helper, `rr file` subcommand (7/7 CLI tests passing)
-- **34 tests passing total**
+- **`src/rr/cli.py`** — `ProjectContext` dataclass, `cli` Click group with `--verbose/-v` flag, `require_project` helper, `rr file` subcommand, `rr init` subcommand (13/13 CLI tests passing)
+- **40 tests passing total**
 
 ## What's Next
-- Wire `rr init` as a subcommand (prompts for project name, parent dir defaults to cwd)
 - Wire `rr reindex` as a subcommand
 
 ## Decisions Made (Not Yet in Spec)
@@ -26,6 +25,7 @@
 - `file_asset` takes `allowed_dirs: list[str]` (names only, not paths) for config validation — raises `ValueError` naming the bad directory before any move happens
 - Default filename suggestion format for `rr file`: `stem-YYYY-MM-DD.ext` (date suffix appended to stem, before extension)
 - Project root discovery lives in `config.py` — `find_project_root` walks upward from cwd looking for `project.yaml`
+- **Projects created by `rr init` are research workspaces, not Python packages.** No `pyproject.toml`, no `uv init`, no `.venv` inside scaffolded projects. `uv` is only for developing `rr` itself. (Now clarified in SPEC.md technical decisions table.)
 
 ### CLI Architecture (decided 2026-03-18)
 - **Click group** with callback that resolves project context: calls `find_project_root(Path.cwd())`, on success stores `ProjectContext` on `ctx.obj`, on `FileNotFoundError` sets `ctx.obj = None`

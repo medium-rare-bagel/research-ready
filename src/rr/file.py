@@ -1,6 +1,7 @@
 import shutil
 from pathlib import Path
 
+from rr.git import git_commit_all
 from rr.index import add_entry, generate_index_md, load_index, save_index
 
 
@@ -11,6 +12,7 @@ def file_asset(
     index_path: Path | None = None,
     index_md_path: Path | None = None,
     description: str = "",
+    project_root: Path | None = None,
 ) -> Path:
     dest = dest_dir / new_name
     shutil.move(str(src), str(dest))
@@ -20,4 +22,6 @@ def file_asset(
         save_index(index_path, index)
         if index_md_path is not None:
             generate_index_md(index_md_path, index)
+    if project_root is not None:
+        git_commit_all(project_root, f"File: {new_name} → {dest_dir.name}/")
     return dest

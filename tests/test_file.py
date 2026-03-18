@@ -1,4 +1,5 @@
 import json
+import subprocess
 from datetime import date
 from pathlib import Path
 import pytest
@@ -70,3 +71,28 @@ def test_file_regenerates_index_md(tmp_path):
     assert "[clean-report-2026-03-18.pdf](sources/clean-report-2026-03-18.pdf)" in content
     assert "sources" in content
     assert "A clean report" in content
+
+
+def test_file_creates_git_commit(tmp_path):
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "commit", "--allow-empty", "-m", "init"], cwd=tmp_path, check=True, capture_output=True)
+    (tmp_path / "inbox").mkdir()
+    (tmp_path / "sources").mkdir()
+    src = tmp_path / "inbox" / "raw_document.pdf"
+    src.write_text("dummy content")
+    index_path = tmp_path / "index.json"
+    index_path.write_text(json.dumps({"last_rebuilt": "2026-03-18", "files": []}))
+    index_md_path = tmp_path / "index.md"
+
+    file_asset(
+        src=src,
+        new_name="clean-report-2026-03-18.pdf",
+        dest_dir=tmp_path / "sources",
+        index_path=index_path,
+        index_md_path=index_md_path,
+        description="A clean report",
+        project_root=tmp_path,
+    )
+
+    log = subprocess.check_output(["git", "log", "-1", "--format=%s"], cwd=tmp_path, text=True).strip()
+    assert log == "File: clean-report-2026-03-18.pdf → sources/"

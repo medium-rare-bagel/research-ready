@@ -3,6 +3,8 @@ from pathlib import Path
 import json
 import yaml
 
+from rr.git import git_commit_all, git_init
+
 DEFAULT_CONFIG = {
     "project": {
         "name": None,  # filled in at runtime
@@ -85,3 +87,6 @@ def init_project(name: str, parent: Path) -> None:
     (project_dir / "CLAUDE.md").write_text(_claude_md(name))
 
     (project_dir / ".gitignore").write_text(_GITIGNORE)
+
+    git_init(project_dir)
+    git_commit_all(project_dir, f"Initialize project: {name}")

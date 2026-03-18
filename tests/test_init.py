@@ -25,6 +25,17 @@ def test_init_creates_claude_md_with_project_name(tmp_path: Path) -> None:
     assert "my-project" in claude_md.read_text()
 
 
+def test_init_creates_git_repo_with_initial_commit(tmp_path: Path) -> None:
+    import subprocess
+    init_project("my-project", tmp_path)
+    project_dir = tmp_path / "my-project"
+    assert (project_dir / ".git").is_dir()
+    log = subprocess.check_output(
+        ["git", "log", "--oneline"], cwd=project_dir, text=True
+    )
+    assert "Initialize project: my-project" in log
+
+
 def test_init_creates_gitignore(tmp_path: Path) -> None:
     init_project("my-project", tmp_path)
     assert (tmp_path / "my-project" / ".gitignore").exists()

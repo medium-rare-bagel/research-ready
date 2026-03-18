@@ -46,3 +46,27 @@ def test_file_updates_index_json(tmp_path):
     assert entry["path"] == "sources/clean-report-2026-03-18.pdf"
     assert entry["description"] == "A clean report"
     assert entry["added"] == date.today().isoformat()
+
+
+def test_file_regenerates_index_md(tmp_path):
+    (tmp_path / "inbox").mkdir()
+    (tmp_path / "sources").mkdir()
+    src = tmp_path / "inbox" / "raw_document.pdf"
+    src.write_text("dummy content")
+    index_path = tmp_path / "index.json"
+    index_path.write_text(json.dumps({"last_rebuilt": "2026-03-18", "files": []}))
+    index_md_path = tmp_path / "index.md"
+
+    file_asset(
+        src=src,
+        new_name="clean-report-2026-03-18.pdf",
+        dest_dir=tmp_path / "sources",
+        index_path=index_path,
+        index_md_path=index_md_path,
+        description="A clean report",
+    )
+
+    content = index_md_path.read_text()
+    assert "[clean-report-2026-03-18.pdf](sources/clean-report-2026-03-18.pdf)" in content
+    assert "sources" in content
+    assert "A clean report" in content

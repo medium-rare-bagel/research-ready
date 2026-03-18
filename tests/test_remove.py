@@ -114,6 +114,33 @@ def test_remove_file_not_on_disk_not_in_index(tmp_path):
         remove_asset("sources/ghost.pdf", tmp_path)
 
 
+def test_remove_by_filename_falls_back_to_index_search(tmp_path):
+    (tmp_path / "sources").mkdir()
+    f = tmp_path / "sources" / "report.pdf"
+    f.write_bytes(b"%PDF")
+    make_index(tmp_path, [make_entry("report.pdf")])
+
+    result = remove_asset("report.pdf", tmp_path)
+
+    assert result["removed_from_index"] is True
+    assert result["removed_from_disk"] is True
+    assert not f.exists()
+
+
+def test_remove_by_filename_ambiguous_raises(tmp_path):
+    (tmp_path / "sources").mkdir()
+    (tmp_path / "analysis").mkdir()
+    (tmp_path / "sources" / "report.pdf").write_bytes(b"%PDF")
+    (tmp_path / "analysis" / "report.pdf").write_bytes(b"%PDF")
+    make_index(
+        tmp_path,
+        [make_entry("report.pdf", "sources"), make_entry("report.pdf", "analysis")],
+    )
+
+    with pytest.raises(ValueError, match="multiple files match"):
+        remove_asset("report.pdf", tmp_path)
+
+
 def test_remove_preserves_other_index_entries(tmp_path):
     (tmp_path / "sources").mkdir()
     f = tmp_path / "sources" / "report.pdf"

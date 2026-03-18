@@ -1,7 +1,7 @@
 # rr — Handoff
 
 ## Last Updated
-2026-03-18 — Fixed `rr file` extension-drop bug; one open issue remains.
+2026-03-18 — Fixed `rr remove` filename-only lookup; all open issues resolved.
 
 ## What's Done
 - **Project scaffolding** — `pyproject.toml` (src layout, `rr` entry point), Python 3.12 pinned, `pyyaml`+`click` runtime deps, `pytest` dev dep
@@ -12,10 +12,10 @@
 - **`src/rr/config.py`** — `find_project_root(cwd)` walks up from cwd looking for `project.yaml`; `load_config(project_root)` parses it (3/3 tests passing)
 - **`src/rr/names.py`** — `suggest_filename(original, date)`: inserts `YYYY-MM-DD` before extension; handles multiple dots and no extension (3/3 tests passing)
 - **`src/rr/reindex.py`** — `reindex(project_root, config, ...)`: scans tracked_dirs, diffs against index.json, adds/removes entries, preserves metadata, skips dotfiles, creates missing dirs, commits only when git has actual changes (12/12 tests passing)
-- **`src/rr/remove.py`** — `remove_asset(file_path, project_root, ...)`: handles all four cases (in index + on disk, in index only, on disk only, neither), deletes file, removes entry, regenerates index.md, git commits "Remove: <filename>". Returns `{"removed_from_index": bool, "removed_from_disk": bool, "warning": str | None}` (8/8 tests passing)
+- **`src/rr/remove.py`** — `remove_asset(file_path, project_root, ...)`: handles all four cases (in index + on disk, in index only, on disk only, neither), deletes file, removes entry, regenerates index.md, git commits "Remove: <filename>". Returns `{"removed_from_index": bool, "removed_from_disk": bool, "warning": str | None}`. Falls back to filename search if bare name given; raises `ValueError` if ambiguous. (10/10 tests passing)
 - **`src/rr/cli.py`** — `ProjectContext` dataclass, `cli` Click group with `--verbose/-v` flag, `require_project` helper, `rr file`, `rr init`, `rr reindex`, `rr remove` subcommands (22/22 CLI tests passing)
 - **Bug fix** — `rr file` now preserves the original file extension when the user omits it in the rename prompt (cli.py:83)
-- **69 tests passing total**
+- **71 tests passing total**
 
 ## What's Next
 - All four MVP subcommands are complete: `rr init`, `rr file`, `rr reindex`, `rr remove`
@@ -44,7 +44,4 @@
 
 ## Open Issues
 
-1.  rr remove index lookup only matches the path field, not filename. Running `rr remove secret_sat_cords` from the project root says "not in index"
-even though index.json has a matching filename entry. Running `rr remove sources/secret_sat_cords` (the full relative path) works fine. Fix: if the
-input doesn't match a path field directly, fall back to searching by filename. If multiple entries share the same filename (e.g.
-sources/report.txt and analysis/report.txt), error with a message like "multiple files match, specify the full path" and list the matches.
+None.

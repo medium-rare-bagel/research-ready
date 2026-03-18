@@ -23,9 +23,19 @@ def remove_asset(
     if index_md_path is None:
         index_md_path = project_root / "index.md"
 
+    index = load_index(index_path)
+
+    # Resolve bare filename to a full path via index lookup
+    if not any(e["path"] == file_path for e in index["files"]) and "/" not in file_path:
+        matches = [e["path"] for e in index["files"] if e["filename"] == file_path]
+        if len(matches) > 1:
+            paths = ", ".join(matches)
+            raise ValueError(f"multiple files match '{file_path}': {paths} — specify the full path")
+        if len(matches) == 1:
+            file_path = matches[0]
+
     abs_path = project_root / file_path
     on_disk = abs_path.exists()
-    index = load_index(index_path)
     in_index = any(e["path"] == file_path for e in index["files"])
 
     if not on_disk and not in_index:

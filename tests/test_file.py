@@ -110,6 +110,30 @@ def test_file_nonexistent_source_raises(tmp_path):
         )
 
 
+def test_file_preserves_existing_index_entries(tmp_path):
+    (tmp_path / "inbox").mkdir()
+    (tmp_path / "sources").mkdir()
+    index_path = tmp_path / "index.json"
+    index_path.write_text(json.dumps({"last_rebuilt": "2026-03-18", "files": []}))
+
+    for name, desc in [("first.pdf", "First file"), ("second.pdf", "Second file")]:
+        src = tmp_path / "inbox" / name
+        src.write_text("content")
+        file_asset(
+            src=src,
+            new_name=name,
+            dest_dir=tmp_path / "sources",
+            index_path=index_path,
+            description=desc,
+        )
+
+    index = json.loads(index_path.read_text())
+    assert len(index["files"]) == 2
+    filenames = [e["filename"] for e in index["files"]]
+    assert "first.pdf" in filenames
+    assert "second.pdf" in filenames
+
+
 def test_file_destination_not_in_config_raises(tmp_path):
     (tmp_path / "inbox").mkdir()
     (tmp_path / "secret").mkdir()

@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import yaml
 from rr.init import init_project
 
@@ -6,6 +7,15 @@ from rr.init import init_project
 def test_init_creates_project_directory(tmp_path: Path) -> None:
     init_project("my-project", tmp_path)
     assert (tmp_path / "my-project").is_dir()
+
+
+def test_init_creates_empty_index_json(tmp_path: Path) -> None:
+    init_project("my-project", tmp_path)
+    index_path = tmp_path / "my-project" / "index.json"
+    assert index_path.exists()
+    index = json.loads(index_path.read_text())
+    assert "last_rebuilt" in index
+    assert index["files"] == []
 
 
 def test_init_creates_subdirectories(tmp_path: Path) -> None:

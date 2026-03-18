@@ -1,4 +1,6 @@
+from datetime import date
 from pathlib import Path
+import json
 import yaml
 
 DEFAULT_CONFIG = {
@@ -29,3 +31,6 @@ def init_project(name: str, parent: Path) -> None:
 
     for d in config["structure"]["directories"]:
         (project_dir / d).mkdir()
+
+    index = {"last_rebuilt": date.today().isoformat(), "files": []}
+    (project_dir / "index.json").write_text(json.dumps(index, indent=2))

@@ -109,9 +109,19 @@ def remove_cmd(ctx: click.Context, path: str, yes: bool) -> None:
     if not yes:
         index = load_index(project.root / "index.json")
         entry = next((e for e in index["files"] if e["path"] == path), None)
+        if entry is None and "/" not in path:
+            matches = [e for e in index["files"] if e["filename"] == path]
+            if len(matches) > 1:
+                paths = ", ".join(e["path"] for e in matches)
+                click.echo(f"Error: multiple files match '{path}': {paths} — specify the full path")
+                ctx.exit(1)
+                return
+            if len(matches) == 1:
+                entry = matches[0]
         if entry:
             desc = entry.get("description", "")
-            click.echo(f"{path}: {desc}" if desc else path)
+            display = entry["path"]
+            click.echo(f"{display}: {desc}" if desc else display)
         else:
             click.echo(f"{path} (not in index)")
         confirmed = click.confirm("Remove this file?", default=False)
@@ -121,7 +131,7 @@ def remove_cmd(ctx: click.Context, path: str, yes: bool) -> None:
 
     try:
         result = remove_asset(path, project.root)
-    except FileNotFoundError as e:
+    except (FileNotFoundError, ValueError) as e:
         click.echo(f"Error: {e}")
         ctx.exit(1)
         return

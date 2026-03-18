@@ -14,6 +14,25 @@ def add_entry(index: dict, filename: str, directory: str, description: str) -> N
     })
 
 
+def generate_index_md(path: Path, index: dict) -> None:
+    lines = [
+        "# Project Index",
+        "",
+        f"Last rebuilt: {index['last_rebuilt']}",
+        "",
+        "| File | Directory | Added | Description |",
+        "|------|-----------|-------|-------------|",
+    ]
+    for entry in index["files"]:
+        lines.append(
+            f"| [{entry['filename']}]({entry['path']}) "
+            f"| {entry['directory']} "
+            f"| {entry['added']} "
+            f"| {entry['description']} |"
+        )
+    path.write_text("\n".join(lines) + "\n")
+
+
 def save_index(path: Path, index: dict) -> None:
     path.write_text(json.dumps(index, indent=2))
 

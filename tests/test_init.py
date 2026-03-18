@@ -18,6 +18,13 @@ def test_init_creates_empty_index_json(tmp_path: Path) -> None:
     assert index["files"] == []
 
 
+def test_init_creates_claude_md_with_project_name(tmp_path: Path) -> None:
+    init_project("my-project", tmp_path)
+    claude_md = tmp_path / "my-project" / "CLAUDE.md"
+    assert claude_md.exists()
+    assert "my-project" in claude_md.read_text()
+
+
 def test_init_creates_subdirectories(tmp_path: Path) -> None:
     init_project("my-project", tmp_path)
     project_dir = tmp_path / "my-project"

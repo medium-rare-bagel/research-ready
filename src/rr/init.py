@@ -21,6 +21,24 @@ DEFAULT_CONFIG = {
 }
 
 
+_GITIGNORE = """\
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials
+.env
+*.key
+*.pem
+"""
+
+
 def _claude_md(name: str) -> str:
     return f"""\
 # Project: {name}
@@ -65,3 +83,5 @@ def init_project(name: str, parent: Path) -> None:
     (project_dir / "index.json").write_text(json.dumps(index, indent=2))
 
     (project_dir / "CLAUDE.md").write_text(_claude_md(name))
+
+    (project_dir / ".gitignore").write_text(_GITIGNORE)

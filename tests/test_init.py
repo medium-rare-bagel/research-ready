@@ -25,6 +25,11 @@ def test_init_creates_claude_md_with_project_name(tmp_path: Path) -> None:
     assert "my-project" in claude_md.read_text()
 
 
+def test_init_creates_gitignore(tmp_path: Path) -> None:
+    init_project("my-project", tmp_path)
+    assert (tmp_path / "my-project" / ".gitignore").exists()
+
+
 def test_init_creates_subdirectories(tmp_path: Path) -> None:
     init_project("my-project", tmp_path)
     project_dir = tmp_path / "my-project"

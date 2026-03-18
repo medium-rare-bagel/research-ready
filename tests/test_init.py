@@ -48,6 +48,15 @@ def test_init_creates_subdirectories(tmp_path: Path) -> None:
         assert (project_dir / name).is_dir(), f"missing directory: {name}"
 
 
+def test_init_creates_index_md_with_table_headers(tmp_path: Path) -> None:
+    init_project("my-project", tmp_path)
+    index_md = tmp_path / "my-project" / "index.md"
+    assert index_md.exists()
+    content = index_md.read_text()
+    assert "| File | Directory | Added | Description |" in content
+    assert "|------|-----------|-------|-------------|" in content
+
+
 def test_init_creates_project_yaml(tmp_path: Path) -> None:
     init_project("my-project", tmp_path)
     config_path = tmp_path / "my-project" / "project.yaml"

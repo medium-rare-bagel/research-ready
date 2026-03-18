@@ -84,6 +84,12 @@ def init_project(name: str, parent: Path) -> None:
     index = {"last_rebuilt": date.today().isoformat(), "files": []}
     (project_dir / "index.json").write_text(json.dumps(index, indent=2))
 
+    (project_dir / "index.md").write_text(
+        f"# Project Index\n\nLast rebuilt: {index['last_rebuilt']}\n\n"
+        "| File | Directory | Added | Description |\n"
+        "|------|-----------|-------|-------------|\n"
+    )
+
     (project_dir / "CLAUDE.md").write_text(_claude_md(name))
 
     (project_dir / ".gitignore").write_text(_GITIGNORE)

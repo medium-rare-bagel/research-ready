@@ -212,6 +212,111 @@ def test_init_works_outside_project(tmp_path, monkeypatch, runner):
     assert result.exit_code == 0
 
 
+def test_cli_remove_with_yes_flag(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "sources" / "report.pdf"
+    src.write_bytes(b"%PDF")
+    # Add to index via reindex
+    import json
+    index_path = project_root / "index.json"
+    index = json.loads(index_path.read_text())
+    index["files"].append({
+        "filename": "report.pdf",
+        "directory": "sources",
+        "path": "sources/report.pdf",
+        "description": "A test file",
+        "added": "2026-03-18",
+        "tags": [],
+    })
+    index_path.write_text(json.dumps(index))
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["remove", "sources/report.pdf", "--yes"], catch_exceptions=False)
+
+    assert result.exit_code == 0
+    assert not src.exists()
+    assert "Removed" in result.output
+
+
+def test_cli_remove_prompts_for_confirmation(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "sources" / "report.pdf"
+    src.write_bytes(b"%PDF")
+    import json
+    index_path = project_root / "index.json"
+    index = json.loads(index_path.read_text())
+    index["files"].append({
+        "filename": "report.pdf",
+        "directory": "sources",
+        "path": "sources/report.pdf",
+        "description": "Quarterly report",
+        "added": "2026-03-18",
+        "tags": [],
+    })
+    index_path.write_text(json.dumps(index))
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["remove", "sources/report.pdf"], input="y\n", catch_exceptions=False)
+
+    assert result.exit_code == 0
+    assert not src.exists()
+    assert "report.pdf" in result.output
+
+
+def test_cli_remove_confirmation_declined(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "sources" / "report.pdf"
+    src.write_bytes(b"%PDF")
+    import json
+    index_path = project_root / "index.json"
+    index = json.loads(index_path.read_text())
+    index["files"].append({
+        "filename": "report.pdf",
+        "directory": "sources",
+        "path": "sources/report.pdf",
+        "description": "Quarterly report",
+        "added": "2026-03-18",
+        "tags": [],
+    })
+    index_path.write_text(json.dumps(index))
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["remove", "sources/report.pdf"], input="n\n", catch_exceptions=False)
+
+    assert result.exit_code == 0
+    assert src.exists()  # file not deleted
+    assert "Aborted" in result.output
+
+
+def test_cli_remove_outside_project(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    runner = CliRunner()
+    result = runner.invoke(cli, ["remove", "sources/report.pdf"])
+    assert result.exit_code != 0
+    assert "not inside an rr project" in result.output
+
+
+def test_cli_remove_shows_warning_for_untracked(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "sources" / "orphan.pdf"
+    src.write_bytes(b"%PDF")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["remove", "sources/orphan.pdf", "--yes"], catch_exceptions=False)
+
+    assert result.exit_code == 0
+    assert not src.exists()
+    assert "Warning" in result.output
+
+
 def test_file_command_uses_default_name_when_accepted(tmp_path, monkeypatch):
     init_project("test-proj", tmp_path)
     project_root = tmp_path / "test-proj"

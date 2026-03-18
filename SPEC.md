@@ -95,7 +95,7 @@ Removes a file from the project and updates the index.
 **What it does:**
 1. Confirms removal with the user (shows filename + index description)
 2. Deletes the file
-3. Removes the entry from `index.md`
+3. Removes the entry from `index.json` and regenerates `index.md`
 4. Git commits: "Remove: <filename>"
 
 **Note:** The file is recoverable via `git checkout` since every prior state is committed.

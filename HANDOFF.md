@@ -1,23 +1,24 @@
 # rr — Handoff
 
 ## Last Updated
-2026-03-18 — `rr reindex` built and wired as CLI subcommand.
+2026-03-18 — `rr remove` built and wired as CLI subcommand. All MVP subcommands complete.
 
 ## What's Done
 - **Project scaffolding** — `pyproject.toml` (src layout, `rr` entry point), Python 3.12 pinned, `pyyaml`+`click` runtime deps, `pytest` dev dep
-- **`src/rr/git.py`** — `git_init`, `git_commit_all` via subprocess, separate from init logic
+- **`src/rr/git.py`** — `git_init`, `git_commit_all` via subprocess, `git_has_changes` helper
 - **`rr init`** — `init_project(name, parent)` in `src/rr/init.py`: creates project dir, `project.yaml`, six subdirectories, `index.json`, `index.md` (table headers, no rows), `CLAUDE.md`, `.gitignore`, git repo + initial commit (8/8 tests passing)
 - **`src/rr/index.py`** — `load_index`, `save_index`, `add_entry`, `generate_index_md` (5/5 tests passing)
 - **`src/rr/file.py`** — `file_asset(src, new_name, dest_dir, ...)`: moves file, updates index.json, regenerates index.md, git commits. Optional params: `index_path`, `index_md_path`, `description`, `project_root`, `allowed_dirs`. (7/7 tests passing)
 - **`src/rr/config.py`** — `find_project_root(cwd)` walks up from cwd looking for `project.yaml`; `load_config(project_root)` parses it (3/3 tests passing)
 - **`src/rr/names.py`** — `suggest_filename(original, date)`: inserts `YYYY-MM-DD` before extension; handles multiple dots and no extension (3/3 tests passing)
 - **`src/rr/reindex.py`** — `reindex(project_root, config, ...)`: scans tracked_dirs, diffs against index.json, adds/removes entries, preserves metadata, skips dotfiles, creates missing dirs, commits only when git has actual changes (12/12 tests passing)
-- **`src/rr/git.py`** — added `git_has_changes(path)` helper
-- **`src/rr/cli.py`** — `ProjectContext` dataclass, `cli` Click group with `--verbose/-v` flag, `require_project` helper, `rr file`, `rr init`, `rr reindex` subcommands (16/16 CLI tests passing)
-- **55 tests passing total**
+- **`src/rr/remove.py`** — `remove_asset(file_path, project_root, ...)`: handles all four cases (in index + on disk, in index only, on disk only, neither), deletes file, removes entry, regenerates index.md, git commits "Remove: <filename>". Returns `{"removed_from_index": bool, "removed_from_disk": bool, "warning": str | None}` (8/8 tests passing)
+- **`src/rr/cli.py`** — `ProjectContext` dataclass, `cli` Click group with `--verbose/-v` flag, `require_project` helper, `rr file`, `rr init`, `rr reindex`, `rr remove` subcommands (21/21 CLI tests passing)
+- **68 tests passing total**
 
 ## What's Next
-- Wire `rr remove` as a subcommand
+- All four MVP subcommands are complete: `rr init`, `rr file`, `rr reindex`, `rr remove`
+- Possible follow-up work: polish, edge cases, additional commands per SPEC.md
 
 ## Decisions Made (Not Yet in Spec)
 - Git operations use `subprocess` (not GitPython or similar) — lightweight, no extra dep
@@ -34,6 +35,11 @@
 - **`ProjectContext` dataclass** in `cli.py` — two fields: `root: Path`, `config: dict`
 - **`require_project` helper** — called at top of subcommands that need a project. Checks `ctx.obj`, if `None` prints error ("not inside an rr project") and exits. Keeps group lenient for `rr init`, gives clear errors elsewhere.
 - **`--verbose` / `-v` flag** on the group — sets logging level to `DEBUG` in group callback before subcommand runs
+
+### rr remove behavior (decided 2026-03-18)
+- Four cases: (1) in index + on disk → delete file, remove from index, commit; (2) in index only → remove from index, commit; (3) on disk only → delete file, warn, commit; (4) neither → raise FileNotFoundError
+- `--yes`/`-y` flag skips confirmation prompt
+- Without `--yes`: shows filename + description (or "not in index"), prompts to confirm; declined exits cleanly
 
 ## Open Issues
 - None currently

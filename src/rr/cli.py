@@ -7,9 +7,11 @@ import click
 
 from rr.config import find_project_root, load_config
 from rr.file import file_asset
+from rr.index import load_index
 from rr.init import init_project
 from rr.names import suggest_filename
 from rr.reindex import reindex
+from rr.remove import remove_asset
 
 
 @dataclass
@@ -93,6 +95,38 @@ def file_cmd(ctx: click.Context, src: Path) -> None:
         allowed_dirs=allowed_dirs,
     )
     click.echo(f"Filed: {result_path.relative_to(project.root)}")
+
+
+@cli.command("remove")
+@click.argument("path")
+@click.option("--yes", "-y", is_flag=True, default=False)
+@click.pass_context
+def remove_cmd(ctx: click.Context, path: str, yes: bool) -> None:
+    project = require_project(ctx)
+
+    if not yes:
+        index = load_index(project.root / "index.json")
+        entry = next((e for e in index["files"] if e["path"] == path), None)
+        if entry:
+            desc = entry.get("description", "")
+            click.echo(f"{path}: {desc}" if desc else path)
+        else:
+            click.echo(f"{path} (not in index)")
+        confirmed = click.confirm("Remove this file?", default=False)
+        if not confirmed:
+            click.echo("Aborted.")
+            return
+
+    try:
+        result = remove_asset(path, project.root)
+    except FileNotFoundError as e:
+        click.echo(f"Error: {e}")
+        ctx.exit(1)
+        return
+
+    if result["warning"]:
+        click.echo(f"Warning: {result['warning']}")
+    click.echo(f"Removed: {path}")
 
 
 def main() -> None:

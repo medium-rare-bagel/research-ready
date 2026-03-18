@@ -96,3 +96,15 @@ def test_file_creates_git_commit(tmp_path):
 
     log = subprocess.check_output(["git", "log", "-1", "--format=%s"], cwd=tmp_path, text=True).strip()
     assert log == "File: clean-report-2026-03-18.pdf → sources/"
+
+
+def test_file_nonexistent_source_raises(tmp_path):
+    (tmp_path / "sources").mkdir()
+    src = tmp_path / "inbox" / "ghost.pdf"  # does not exist
+
+    with pytest.raises(FileNotFoundError):
+        file_asset(
+            src=src,
+            new_name="ghost.pdf",
+            dest_dir=tmp_path / "sources",
+        )

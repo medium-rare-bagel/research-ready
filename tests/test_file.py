@@ -1,3 +1,5 @@
+import json
+from datetime import date
 from pathlib import Path
 import pytest
 from rr.file import file_asset
@@ -18,3 +20,29 @@ def test_file_moves_to_destination(tmp_path):
 
     assert (tmp_path / "sources" / "clean-report-2026-03-18.pdf").exists()
     assert not src.exists()
+
+
+def test_file_updates_index_json(tmp_path):
+    (tmp_path / "inbox").mkdir()
+    (tmp_path / "sources").mkdir()
+    src = tmp_path / "inbox" / "raw_document.pdf"
+    src.write_text("dummy content")
+    index_path = tmp_path / "index.json"
+    index_path.write_text(json.dumps({"last_rebuilt": "2026-03-18", "files": []}))
+
+    file_asset(
+        src=src,
+        new_name="clean-report-2026-03-18.pdf",
+        dest_dir=tmp_path / "sources",
+        index_path=index_path,
+        description="A clean report",
+    )
+
+    index = json.loads(index_path.read_text())
+    assert len(index["files"]) == 1
+    entry = index["files"][0]
+    assert entry["filename"] == "clean-report-2026-03-18.pdf"
+    assert entry["directory"] == "sources"
+    assert entry["path"] == "sources/clean-report-2026-03-18.pdf"
+    assert entry["description"] == "A clean report"
+    assert entry["added"] == date.today().isoformat()

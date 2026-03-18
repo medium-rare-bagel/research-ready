@@ -1,10 +1,15 @@
 import click
+import json
 import logging
+import subprocess
 import pytest
 from click.testing import CliRunner
+from datetime import date
 from pathlib import Path
 
 from rr.cli import cli, ProjectContext, require_project
+from rr.init import init_project
+from rr.names import suggest_filename
 
 
 @pytest.fixture()
@@ -105,3 +110,56 @@ def test_require_project_returns_context_inside_project(tmp_path, monkeypatch, r
         assert captured[0].root == tmp_path
     finally:
         cli.commands.pop("_dummy_req_ok", None)
+
+
+def test_file_command_moves_and_indexes(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "inbox" / "test.png"
+    src.write_bytes(b"\x89PNG")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["file", "inbox/test.png"],
+        input="test-2026-03-18.png\nsources\nA test image\n",
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+    assert (project_root / "sources" / "test-2026-03-18.png").exists()
+    assert not src.exists()
+
+    index = json.loads((project_root / "index.json").read_text())
+    assert len(index["files"]) == 1
+    entry = index["files"][0]
+    assert entry["filename"] == "test-2026-03-18.png"
+    assert entry["directory"] == "sources"
+    assert entry["description"] == "A test image"
+
+    log = subprocess.check_output(
+        ["git", "log", "-1", "--format=%s"], cwd=project_root, text=True
+    ).strip()
+    assert "test-2026-03-18.png" in log
+
+
+def test_file_command_uses_default_name_when_accepted(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "inbox" / "report.pdf"
+    src.write_bytes(b"%PDF")
+    monkeypatch.chdir(project_root)
+
+    expected_name = suggest_filename("report.pdf", date.today())
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["file", "inbox/report.pdf"],
+        input="\nsources\nQuarterly report\n",
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+    assert (project_root / "sources" / expected_name).exists()

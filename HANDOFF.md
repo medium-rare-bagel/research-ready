@@ -1,7 +1,7 @@
 # rr — Handoff
 
 ## Last Updated
-2026-03-18 — `cli.py` Click group + `ProjectContext` built and tested.
+2026-03-18 — `rr file` subcommand wired and tested end-to-end.
 
 ## What's Done
 - **Project scaffolding** — `pyproject.toml` (src layout, `rr` entry point), Python 3.12 pinned, `pyyaml`+`click` runtime deps, `pytest` dev dep
@@ -11,14 +11,12 @@
 - **`src/rr/file.py`** — `file_asset(src, new_name, dest_dir, ...)`: moves file, updates index.json, regenerates index.md, git commits. Optional params: `index_path`, `index_md_path`, `description`, `project_root`, `allowed_dirs`. (7/7 tests passing)
 - **`src/rr/config.py`** — `find_project_root(cwd)` walks up from cwd looking for `project.yaml`; `load_config(project_root)` parses it (3/3 tests passing)
 - **`src/rr/names.py`** — `suggest_filename(original, date)`: inserts `YYYY-MM-DD` before extension; handles multiple dots and no extension (3/3 tests passing)
-- **`src/rr/cli.py`** — `ProjectContext` dataclass, `cli` Click group with `--verbose/-v` flag, project root resolution on group callback (3/3 tests passing)
-- **30 tests passing total**
+- **`src/rr/cli.py`** — `ProjectContext` dataclass, `cli` Click group with `--verbose/-v` flag, `require_project` helper, `rr file` subcommand (7/7 CLI tests passing)
+- **34 tests passing total**
 
 ## What's Next
-- Add `require_project` helper to `cli.py` (checks `ctx.obj`, prints error and exits if None)
-- Wire `rr file` subcommand: prompts for destination dir, suggested name, description; calls `file_asset`
-- Tests: `test_file_command_moves_and_indexes`, `test_file_command_uses_default_name_when_accepted`
-- After `rr file` CLI: wire `rr init` as subcommand, then `rr reindex`
+- Wire `rr init` as a subcommand (prompts for project name, parent dir defaults to cwd)
+- Wire `rr reindex` as a subcommand
 
 ## Decisions Made (Not Yet in Spec)
 - Git operations use `subprocess` (not GitPython or similar) — lightweight, no extra dep

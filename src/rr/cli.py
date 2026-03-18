@@ -1,10 +1,13 @@
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 import logging
 
 import click
 
 from rr.config import find_project_root, load_config
+from rr.file import file_asset
+from rr.names import suggest_filename
 
 
 @dataclass
@@ -31,6 +34,32 @@ def require_project(ctx: click.Context) -> ProjectContext:
         click.echo("Error: not inside an rr project (no project.yaml found)")
         ctx.exit(1)
     return ctx.obj
+
+
+@cli.command("file")
+@click.argument("src", type=click.Path(exists=True, path_type=Path))
+@click.pass_context
+def file_cmd(ctx: click.Context, src: Path) -> None:
+    project = require_project(ctx)
+    allowed_dirs = project.config["structure"]["directories"]
+    default_name = suggest_filename(src.name, date.today())
+
+    new_name = click.prompt("New name", default=default_name)
+    dest_dir_name = click.prompt("Destination directory", default="sources")
+    description = click.prompt("Description", default="")
+
+    dest_dir = project.root / dest_dir_name
+    result_path = file_asset(
+        src=src,
+        new_name=new_name,
+        dest_dir=dest_dir,
+        index_path=project.root / "index.json",
+        index_md_path=project.root / "index.md",
+        description=description,
+        project_root=project.root,
+        allowed_dirs=allowed_dirs,
+    )
+    click.echo(f"Filed: {result_path.relative_to(project.root)}")
 
 
 def main() -> None:

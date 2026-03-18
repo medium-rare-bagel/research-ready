@@ -108,3 +108,19 @@ def test_file_nonexistent_source_raises(tmp_path):
             new_name="ghost.pdf",
             dest_dir=tmp_path / "sources",
         )
+
+
+def test_file_destination_not_in_config_raises(tmp_path):
+    (tmp_path / "inbox").mkdir()
+    (tmp_path / "secret").mkdir()
+    src = tmp_path / "inbox" / "raw_document.pdf"
+    src.write_text("dummy content")
+    allowed_dirs = ["sources", "analysis", "output", "shared", "scripts"]
+
+    with pytest.raises(ValueError, match="secret"):
+        file_asset(
+            src=src,
+            new_name="raw_document.pdf",
+            dest_dir=tmp_path / "secret",
+            allowed_dirs=allowed_dirs,
+        )

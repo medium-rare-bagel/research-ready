@@ -13,7 +13,10 @@ def file_asset(
     index_md_path: Path | None = None,
     description: str = "",
     project_root: Path | None = None,
+    allowed_dirs: list[str] | None = None,
 ) -> Path:
+    if allowed_dirs is not None and dest_dir.name not in allowed_dirs:
+        raise ValueError(f"'{dest_dir.name}' is not in the project's allowed directories: {allowed_dirs}")
     dest = dest_dir / new_name
     shutil.move(str(src), str(dest))
     if index_path is not None:

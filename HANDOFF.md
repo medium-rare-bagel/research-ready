@@ -1,7 +1,7 @@
 # rr — Handoff
 
 ## Last Updated
-2026-03-18 — `config.py` built and tested; preparing CLI wiring.
+2026-03-18 — `names.py` built and tested; ready for CLI wiring.
 
 ## What's Done
 - **Project scaffolding** — `pyproject.toml` (src layout, `rr` entry point), Python 3.12 pinned, `pyyaml` runtime dep, `pytest` dev dep
@@ -10,7 +10,8 @@
 - **`src/rr/index.py`** — `load_index`, `save_index`, `add_entry`, `generate_index_md` (5/5 tests passing)
 - **`src/rr/file.py`** — `file_asset(src, new_name, dest_dir, ...)`: moves file, updates index.json, regenerates index.md, git commits. Optional params: `index_path`, `index_md_path`, `description`, `project_root`, `allowed_dirs`. (7/7 tests passing)
 - **`src/rr/config.py`** — `find_project_root(cwd)` walks up from cwd looking for `project.yaml`; `load_config(project_root)` parses it (3/3 tests passing)
-- **24 tests passing total**
+- **`src/rr/names.py`** — `suggest_filename(original, date)`: inserts `YYYY-MM-DD` before extension; handles multiple dots and no extension (3/3 tests passing)
+- **27 tests passing total**
 
 ## What's Next
 - Wire up `src/rr/cli.py`: `rr file` Click command — interactive prompts for new name, destination, description — calls `file_asset` with all params resolved from project.yaml and project root

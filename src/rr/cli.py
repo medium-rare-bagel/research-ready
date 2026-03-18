@@ -26,5 +26,12 @@ def cli(ctx: click.Context, verbose: bool) -> None:
         ctx.obj = None
 
 
+def require_project(ctx: click.Context) -> ProjectContext:
+    if ctx.obj is None:
+        click.echo("Error: not inside an rr project (no project.yaml found)")
+        ctx.exit(1)
+    return ctx.obj
+
+
 def main() -> None:
     cli()

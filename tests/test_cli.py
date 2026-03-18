@@ -4,7 +4,7 @@ import pytest
 from click.testing import CliRunner
 from pathlib import Path
 
-from rr.cli import cli, ProjectContext
+from rr.cli import cli, ProjectContext, require_project
 
 
 @pytest.fixture()
@@ -69,3 +69,39 @@ def test_verbose_flag_sets_debug_logging(tmp_path, monkeypatch, runner):
     finally:
         cli.commands.pop("_dummy_verbose", None)
         logging.getLogger().setLevel(original_level)
+
+
+def test_require_project_exits_outside_project(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+
+    @cli.command("_dummy_req_none")
+    @click.pass_context
+    def dummy(ctx):
+        require_project(ctx)
+
+    try:
+        result = runner.invoke(cli, ["_dummy_req_none"])
+        assert result.exit_code == 1
+        assert "not inside an rr project" in result.output
+    finally:
+        cli.commands.pop("_dummy_req_none", None)
+
+
+def test_require_project_returns_context_inside_project(tmp_path, monkeypatch, runner):
+    (tmp_path / "project.yaml").write_text("name: test\ndirectories:\n  - data\n")
+    monkeypatch.chdir(tmp_path)
+
+    captured = []
+
+    @cli.command("_dummy_req_ok")
+    @click.pass_context
+    def dummy(ctx):
+        captured.append(require_project(ctx))
+
+    try:
+        result = runner.invoke(cli, ["_dummy_req_ok"])
+        assert result.exit_code == 0
+        assert isinstance(captured[0], ProjectContext)
+        assert captured[0].root == tmp_path
+    finally:
+        cli.commands.pop("_dummy_req_ok", None)

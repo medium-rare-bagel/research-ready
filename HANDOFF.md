@@ -57,6 +57,8 @@
 
 - **Git remote support** — Option to configure and push to a git remote (GitHub, NAS, bare repo on external drive, etc.). Since rr already auto-commits every operation, adding remote sync would give users offsite backup and collaboration without needing a separate backup tool. Could be as simple as `rr remote set <url>` and an auto-push after each commit, or a manual `rr push`. Worth scoping during roadmap review.
 
+- **Large file handling** — Git auto-commit means every filed asset gets stored in git history. For projects with video or other large binaries, this will bloat `.git/` fast (git's delta compression doesn't help with binaries). Leading option: a `git.max_file_size` setting in `project.yaml` that auto-adds files above the threshold to `.gitignore` while still tracking them in `index.json`. Keeps the index as the provenance record without bloating the repo. Other options considered: Git LFS (adds dependency), selective staging. Evaluate during roadmap planning.
+
 ## Open Issues
 
 None.

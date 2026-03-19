@@ -42,6 +42,18 @@
 - `--yes`/`-y` flag skips confirmation prompt
 - Without `--yes`: shows filename + description (or "not in index"), prompts to confirm; declined exits cleanly
 
+
+# known spec gaps (low priority):
+
+- index.json entries missing modified field per spec schema
+- rr init missing --config and --no-git flags per spec
+
+
+## Wishlist / Feature Ideas
+
+*No ideas yet.*
+
 ## Open Issues
 
 None.
+

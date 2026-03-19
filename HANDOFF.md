@@ -51,7 +51,7 @@
 
 ## Wishlist / Feature Ideas
 
-*No ideas yet.*
+- **Unindexed file awareness** — Files saved directly into tracked directories (bypassing `rr file`) are invisible until `rr reindex`. Two options considered: (1) auto-triggered reindex, (2) status reporting (e.g., `rr status` or a note printed after other commands showing count of unindexed files). Leaning toward Option 2 — fits rr's explicit, user-driven design better. Not locked in yet.
 
 ## Open Issues
 

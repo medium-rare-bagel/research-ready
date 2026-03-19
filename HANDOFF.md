@@ -1,7 +1,7 @@
 # rr — Handoff
 
 ## Last Updated
-2026-03-18 — Fixed `rr remove` filename-only lookup; all open issues resolved.
+2026-03-19 — Extracted wishlist into dedicated WISHLIST.md; cleaned up HANDOFF.
 
 ## What's Done
 - **Project scaffolding** — `pyproject.toml` (src layout, `rr` entry point), Python 3.12 pinned, `pyyaml`+`click` runtime deps, `pytest` dev dep
@@ -19,39 +19,17 @@
 
 ## What's Next
 - All four MVP subcommands are complete: `rr init`, `rr file`, `rr reindex`, `rr remove`
-- Possible follow-up work: polish, edge cases, additional commands per SPEC.md
+- See `WISHLIST.md` for feature ideas and backlog items
 
 ## Decisions Made (Not Yet in Spec)
-- Git operations use `subprocess` (not GitPython or similar) — lightweight, no extra dep
-- `rr init` creates `index.md` with table headers and no rows
-- CLI framework: **Click**
-- Logging: `logging.getLogger(__name__)` per module, INFO for user output, DEBUG for internals — not yet wired, add when building CLI
 - `file_asset` takes `allowed_dirs: list[str]` (names only, not paths) for config validation — raises `ValueError` naming the bad directory before any move happens
 - Default filename suggestion format for `rr file`: `stem-YYYY-MM-DD.ext` (date suffix appended to stem, before extension)
-- Project root discovery lives in `config.py` — `find_project_root` walks upward from cwd looking for `project.yaml`
 - **Projects created by `rr init` are research workspaces, not Python packages.** No `pyproject.toml`, no `uv init`, no `.venv` inside scaffolded projects. `uv` is only for developing `rr` itself. (Now clarified in SPEC.md technical decisions table.)
 
-### CLI Architecture (decided 2026-03-18)
-- **Click group** with callback that resolves project context: calls `find_project_root(Path.cwd())`, on success stores `ProjectContext` on `ctx.obj`, on `FileNotFoundError` sets `ctx.obj = None`
-- **`ProjectContext` dataclass** in `cli.py` — two fields: `root: Path`, `config: dict`
-- **`require_project` helper** — called at top of subcommands that need a project. Checks `ctx.obj`, if `None` prints error ("not inside an rr project") and exits. Keeps group lenient for `rr init`, gives clear errors elsewhere.
-- **`--verbose` / `-v` flag** on the group — sets logging level to `DEBUG` in group callback before subcommand runs
-
-### rr remove behavior (decided 2026-03-18)
-- Four cases: (1) in index + on disk → delete file, remove from index, commit; (2) in index only → remove from index, commit; (3) on disk only → delete file, warn, commit; (4) neither → raise FileNotFoundError
-- `--yes`/`-y` flag skips confirmation prompt
-- Without `--yes`: shows filename + description (or "not in index"), prompts to confirm; declined exits cleanly
-
-
-# known spec gaps (low priority):
-
-- index.json entries missing modified field per spec schema
-- rr init missing --config and --no-git flags per spec
-
-
-See `WISHLIST.md` for feature ideas and backlog items.
+## Known Spec Gaps (Low Priority)
+- `index.json` entries missing `modified` field per spec schema
+- `rr init` missing `--config` and `--no-git` flags per spec
 
 ## Open Issues
 
 None.
-

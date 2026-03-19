@@ -59,6 +59,14 @@
 
 - **Large file handling** — Git auto-commit means every filed asset gets stored in git history. For projects with video or other large binaries, this will bloat `.git/` fast (git's delta compression doesn't help with binaries). Leading option: a `git.max_file_size` setting in `project.yaml` that auto-adds files above the threshold to `.gitignore` while still tracking them in `index.json`. Keeps the index as the provenance record without bloating the repo. Other options considered: Git LFS (adds dependency), selective staging. Evaluate during roadmap planning.
 
+- **`rr init` customization** — Currently `rr init` stamps out a fixed default structure. Ideas for making it more flexible:
+  - Interactive prompt to accept default directories or specify custom ones (comma-separated).
+  - LLM context file flexibility: `--no-llm` flag to skip `CLAUDE.md`, or a config key (`llm.context_file`) to generate for other tools (Cursor, Windsurf, etc.) or skip entirely. If going LLM-agnostic, the template content should be generic project context, not Claude-specific. A `--no-llm` flag is the 80/20 solution.
+  - The `--config` flag is already in the spec but unimplemented — could serve as the power-user path for full template control.
+  - Keep it simple: sensible defaults, minimal prompts, easy to just hit enter through.
+
+- **Backup reminder on init** — Display a one-liner after project creation: "rr uses git for history tracking, not as a backup system. Consider setting up a remote or external backup for this project." Low-effort nudge that sets expectations at the right moment.
+
 ## Open Issues
 
 None.

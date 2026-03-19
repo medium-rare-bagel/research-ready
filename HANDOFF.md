@@ -55,6 +55,8 @@
 
 - **Obsidian-compatible link format (OBS-001)** — Standard markdown links in `index.md` don't open non-markdown files in Obsidian; they create empty new notes instead. Need to decide: wikilinks (`[[path|name]]`), configurable format in `project.yaml`, or dual output. Evaluate during planning session 2026-03-22. See `observed_errors.md` OBS-001 for details.
 
+- **Git remote support** — Option to configure and push to a git remote (GitHub, NAS, bare repo on external drive, etc.). Since rr already auto-commits every operation, adding remote sync would give users offsite backup and collaboration without needing a separate backup tool. Could be as simple as `rr remote set <url>` and an auto-push after each commit, or a manual `rr push`. Worth scoping during roadmap review.
+
 ## Open Issues
 
 None.

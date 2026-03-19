@@ -71,6 +71,9 @@ Tests go in `tests/`. Source code goes in `src/rr/`.
 rr/
 ├── CLAUDE.md              # This file
 ├── SPEC.md                # Project specification
+├── HANDOFF.md             # Session continuity — where we left off
+├── WISHLIST.md            # Feature ideas and backlog
+├── observed_errors.md     # Real-world usage issues (reviewed during planning)
 ├── pyproject.toml         # uv/Python project config
 ├── src/
 │   └── rr/

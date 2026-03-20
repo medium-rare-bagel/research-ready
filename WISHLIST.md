@@ -30,6 +30,18 @@ Currently `rr init` stamps out a fixed default structure. Ideas for making it mo
 
 Display a one-liner after project creation: "rr uses git for history tracking, not as a backup system. Consider setting up a remote or external backup for this project." Low-effort nudge that sets expectations at the right moment.
 
+## `--no-git` and `--config` flags for `rr init`
+
+Both are spec'd (SPEC.md lines 58-59) but not implemented. `--no-git` also requires end-to-end support: `file`, `remove`, and `reindex` currently call git unconditionally, so they'd need to check whether the project is a git repo before calling git operations. Without this, a no-git project would crash on the first file operation.
+
+## `modified` field in index.json entries
+
+The spec schema includes a `modified` field on index entries, but it's not populated by any current code path.
+
+## Partial state on git failure
+
+Git operations are the last step in `file_asset`, `remove_asset`, and `reindex`, but filesystem and index changes happen first with no rollback. If a git commit fails (lock contention, disk full, corrupted repo), the file is already moved/deleted and the index already updated — but nothing is committed. `git_commit_all` itself is two subprocess calls (`git add -A` then `git commit`), so a failure between them leaves staged-but-uncommitted changes. Options: try/except with rollback, journaling, or at minimum a clear warning that uncommitted changes remain.
+
 ## Post-init welcome message
 
 `rr init` currently prints a single line (`Initialized project: {name}`). For a user's first encounter with the tool — or after a break — that's not enough context. Add a brief post-init summary showing what was created (directories, key files) and the main commands (`rr file`, `rr remove`, `rr reindex`). Keep it to 6-8 lines of plain `click.echo` output — no new dependencies. Click's built-in `click.style()` is sufficient for any emphasis needed. Detail the exact output format during roadmap planning.

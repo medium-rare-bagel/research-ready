@@ -26,10 +26,6 @@
 - Default filename suggestion format for `rr file`: `stem-YYYY-MM-DD.ext` (date suffix appended to stem, before extension)
 - **Projects created by `rr init` are research workspaces, not Python packages.** No `pyproject.toml`, no `uv init`, no `.venv` inside scaffolded projects. `uv` is only for developing `rr` itself. (Now clarified in SPEC.md technical decisions table.)
 
-## Known Spec Gaps (Low Priority)
-- `index.json` entries missing `modified` field per spec schema
-- `rr init` missing `--config` and `--no-git` flags per spec
-
 ## Open Issues
 
 None.

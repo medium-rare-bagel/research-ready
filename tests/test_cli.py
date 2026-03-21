@@ -8,8 +8,8 @@ from datetime import date
 from pathlib import Path
 
 from rr.cli import cli, ProjectContext, require_project
-from rr.init import init_project
-from rr.names import suggest_filename
+from rr_core.init import init_project
+from rr_core.names import suggest_filename
 
 
 @pytest.fixture()

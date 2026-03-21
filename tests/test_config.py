@@ -1,6 +1,6 @@
 from pathlib import Path
 import pytest
-from rr.config import find_project_root, load_config
+from rr_core.config import find_project_root, load_config
 
 
 def test_find_project_root_from_project_dir(tmp_path):

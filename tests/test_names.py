@@ -1,5 +1,5 @@
 import datetime
-from rr.names import suggest_filename
+from rr_core.names import suggest_filename
 
 
 def test_suggest_filename_adds_date_suffix():

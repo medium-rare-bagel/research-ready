@@ -5,13 +5,13 @@ import logging
 
 import click
 
-from rr.config import find_project_root, load_config
-from rr.file import file_asset
-from rr.index import load_index
-from rr.init import init_project
-from rr.names import suggest_filename
-from rr.reindex import reindex
-from rr.remove import remove_asset
+from rr_core.config import find_project_root, load_config
+from rr_core.file import file_asset
+from rr_core.index import load_index
+from rr_core.init import init_project
+from rr_core.names import suggest_filename
+from rr_core.reindex import reindex
+from rr_core.remove import remove_asset
 
 
 @dataclass

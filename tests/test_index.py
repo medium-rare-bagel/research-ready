@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from rr.index import load_index
+from rr_core.index import load_index
 
 
 def test_load_index_returns_parsed_dict(tmp_path: Path) -> None:
@@ -11,7 +11,7 @@ def test_load_index_returns_parsed_dict(tmp_path: Path) -> None:
 
 
 def test_add_entry_adds_file_entry_to_index(tmp_path: Path) -> None:
-    from rr.index import add_entry
+    from rr_core.index import add_entry
     index = {"last_rebuilt": "2026-03-18", "files": []}
     add_entry(index, filename="report.pdf", directory="sources", description="A report")
     assert len(index["files"]) == 1
@@ -25,7 +25,7 @@ def test_add_entry_adds_file_entry_to_index(tmp_path: Path) -> None:
 
 
 def test_save_index_round_trips_through_load_index(tmp_path: Path) -> None:
-    from rr.index import save_index
+    from rr_core.index import save_index
     data = {"last_rebuilt": "2026-03-18", "files": [{"filename": "report.pdf", "directory": "sources"}]}
     path = tmp_path / "index.json"
     save_index(path, data)
@@ -34,7 +34,7 @@ def test_save_index_round_trips_through_load_index(tmp_path: Path) -> None:
 
 
 def test_generate_index_md_produces_one_data_row(tmp_path: Path) -> None:
-    from rr.index import add_entry, save_index, generate_index_md
+    from rr_core.index import add_entry, save_index, generate_index_md
     index = {"last_rebuilt": "2026-03-18", "files": []}
     add_entry(index, filename="report.pdf", directory="sources", description="A report")
     save_index(tmp_path / "index.json", index)

@@ -1,8 +1,8 @@
 import shutil
 from pathlib import Path
 
-from rr.git import git_commit_all
-from rr.index import add_entry, generate_index_md, load_index, save_index
+from rr_core.git import git_commit_all
+from rr_core.index import add_entry, generate_index_md, load_index, save_index
 
 
 def file_asset(

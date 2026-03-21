@@ -3,7 +3,7 @@ import subprocess
 from datetime import date
 from pathlib import Path
 import pytest
-from rr.file import file_asset
+from rr_core.file import file_asset
 
 
 def test_file_moves_to_destination(tmp_path):

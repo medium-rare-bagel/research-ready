@@ -5,10 +5,10 @@ from pathlib import Path
 
 import pytest
 
-from rr.config import load_config
-from rr.index import load_index, save_index
-from rr.init import init_project
-from rr.reindex import reindex
+from rr_core.config import load_config
+from rr_core.index import load_index, save_index
+from rr_core.init import init_project
+from rr_core.reindex import reindex
 
 
 @pytest.fixture()

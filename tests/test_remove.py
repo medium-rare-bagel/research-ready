@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from rr.remove import remove_asset
+from rr_core.remove import remove_asset
 
 
 def make_index(tmp_path: Path, files: list | None = None) -> None:

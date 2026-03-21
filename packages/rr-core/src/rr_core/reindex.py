@@ -2,8 +2,8 @@ from datetime import date
 from pathlib import Path
 import logging
 
-from rr.git import git_commit_all, git_has_changes
-from rr.index import generate_index_md, load_index, save_index
+from rr_core.git import git_commit_all, git_has_changes
+from rr_core.index import generate_index_md, load_index, save_index
 
 logger = logging.getLogger(__name__)
 

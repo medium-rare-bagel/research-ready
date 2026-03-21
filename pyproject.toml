@@ -1,23 +1,9 @@
-[project]
-name = "rr"
-version = "0.1.0"
-description = "CLI tool for scaffolding and managing research project workspaces"
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "click>=8.3.1",
-    "pyyaml>=6.0.3",
-]
+[tool.uv.workspace]
+members = ["packages/*"]
 
-[project.scripts]
-rr = "rr.cli:main"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/rr"]
+[tool.uv.sources]
+rr = { workspace = true }
+rr-core = { workspace = true }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -25,4 +11,6 @@ testpaths = ["tests"]
 [dependency-groups]
 dev = [
     "pytest>=8.0",
+    "rr",
+    "rr-core",
 ]

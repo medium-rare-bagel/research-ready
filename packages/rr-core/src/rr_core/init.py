@@ -3,7 +3,7 @@ from pathlib import Path
 import json
 import yaml
 
-from rr.git import git_commit_all, git_init
+from rr_core.git import git_commit_all, git_init
 
 DEFAULT_CONFIG = {
     "project": {

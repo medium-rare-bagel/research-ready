@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
 import yaml
-from rr.init import init_project
+from rr_core.init import init_project
 
 
 def test_init_creates_project_directory(tmp_path: Path) -> None:

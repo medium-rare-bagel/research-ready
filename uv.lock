@@ -2,6 +2,19 @@ version = 1
 revision = 3
 requires-python = ">=3.12"
 
+[manifest]
+members = [
+    "rr",
+    "rr-core",
+]
+
+[manifest.dependency-groups]
+dev = [
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "rr", editable = "packages/rr" },
+    { name = "rr-core", editable = "packages/rr-core" },
+]
+
 [[package]]
 name = "click"
 version = "8.3.1"
@@ -124,22 +137,25 @@ wheels = [
 [[package]]
 name = "rr"
 version = "0.1.0"
-source = { editable = "." }
+source = { editable = "packages/rr" }
 dependencies = [
     { name = "click" },
-    { name = "pyyaml" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
+    { name = "rr-core" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.3.1" },
-    { name = "pyyaml", specifier = ">=6.0.3" },
+    { name = "rr-core", editable = "packages/rr-core" },
 ]
 
-[package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=8.0" }]
+[[package]]
+name = "rr-core"
+version = "0.1.0"
+source = { editable = "packages/rr-core" }
+dependencies = [
+    { name = "pyyaml" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pyyaml", specifier = ">=6.0.3" }]

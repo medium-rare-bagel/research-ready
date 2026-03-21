@@ -21,6 +21,12 @@ Common operations:
 - `uv sync` — sync the virtual environment with pyproject.toml
 - `uv lock` — update the lockfile
 
+Workspace commands (run from repo root):
+- `uv sync` — sync all workspace packages
+- `uv run pytest` — runs tests across the workspace
+- `uv add --package rr-core <dep>` — add dep to rr-core specifically
+- `uv add --package rr <dep>` — add dep to rr CLI specifically
+
 If a package install fails with uv, troubleshoot uv — do not switch to pip.
 The virtual environment lives in `.venv/` and is managed by uv automatically.
 Dependencies are declared in `pyproject.toml`, not `requirements.txt`.
@@ -50,7 +56,7 @@ This is a personal tool, not enterprise software. The TDD discipline is about ca
 - Don't write tests for trivial getters/setters. Focus on behavior.
 - Run tests with `uv run pytest`. Always.
 
-Tests go in `tests/`. Source code goes in `src/rr/`.
+Tests go in `tests/`. Business logic goes in `packages/rr-core/src/rr_core/`. CLI code goes in `packages/rr/src/rr/`.
 
 ## Code Standards
 - Pythonic, idiomatic code. Type hints on all public functions.
@@ -71,28 +77,38 @@ Tests go in `tests/`. Source code goes in `src/rr/`.
 rr/
 ├── CLAUDE.md              # This file
 ├── SPEC.md                # Project specification
-├── HANDOFF.md             # Session continuity — where we left off
+├── HANDOFF.md             # Session continuity
 ├── WISHLIST.md            # Feature ideas and backlog
-├── observed_errors.md     # Real-world usage issues (reviewed during planning)
-├── pyproject.toml         # uv/Python project config
-├── src/
-│   └── rr/
-│       ├── __init__.py
-│       ├── cli.py         # CLI entry point and subcommands
-│       ├── init.py        # rr init logic
-│       ├── file.py        # rr file logic
-│       ├── remove.py      # rr remove logic
-│       ├── reindex.py     # rr reindex logic
-│       ├── index.py       # Index read/write operations
-│       ├── config.py      # project.yaml read/write
-│       └── git.py         # Git operations (commit, init)
-└── tests/
-    ├── conftest.py        # Shared fixtures (tmp project dirs, etc.)
-    ├── test_init.py
+├── observed_errors.md     # Real-world usage issues
+├── pyproject.toml         # Workspace coordinator (not a package itself)
+├── packages/
+│   ├── rr-core/           # Core logic — no Click dependency
+│   │   ├── pyproject.toml
+│   │   └── src/rr_core/
+│   │       ├── __init__.py
+│   │       ├── init.py
+│   │       ├── file.py
+│   │       ├── remove.py
+│   │       ├── reindex.py
+│   │       ├── index.py
+│   │       ├── config.py
+│   │       ├── git.py
+│   │       └── names.py
+│   └── rr/                # CLI layer — depends on rr-core
+│       ├── pyproject.toml
+│       └── src/rr/
+│           ├── __init__.py
+│           └── cli.py
+└── tests/                 # All tests (imports from rr_core and rr)
+    ├── conftest.py
+    ├── test_cli.py
+    ├── test_config.py
     ├── test_file.py
-    ├── test_remove.py
+    ├── test_index.py
+    ├── test_init.py
+    ├── test_names.py
     ├── test_reindex.py
-    └── test_index.py
+    └── test_remove.py
 ```
 
 ## Key Design Decisions
@@ -103,6 +119,7 @@ rr/
 - **Flat structure:** One level of subdirectories. No nesting.
 - **Obsidian-friendly:** Generated `index.md` uses standard markdown links. Projects can live inside or be symlinked into an Obsidian vault.
 - **Separation of concerns:** Keep index operations (`index.py`) separate from filesystem operations (`file.py`). The index should not assume files are local — future versions may track remote files (e.g., Google Drive).
+- **rr-core / rr split:** Business logic lives in `rr-core` with no Click dependency. The `rr` package is a thin CLI wrapper only. This allows `rr-core` to be called programmatically (e.g. by Claude Code CLI or a future GUI) without going through Click's interactive prompts.
 
 ## Session Workflow
 

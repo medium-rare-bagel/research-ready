@@ -15,6 +15,6 @@ refactor/uv-workspace — DO NOT merge to main until CLAUDE.md and ARCHITECTURE.
 - Branch pushed to GitHub: refactor/uv-workspace
 
 ## Still To Do Before Merging Branch
-- [ ] Update CLAUDE.md — project layout section is now wrong, add workspace commands
-- [ ] Create ARCHITECTURE.md — document the rr-core/rr/rr-gui package boundary and rationale
-- [ ] Merge refactor/uv-workspace → main when both docs are done
+- [x] Update CLAUDE.md — workspace commands, project layout, code standards, design decisions
+- [x] Create ARCHITECTURE.md — document the rr-core/rr package split and rationale
+- [ ] Merge refactor/uv-workspace → master when ready

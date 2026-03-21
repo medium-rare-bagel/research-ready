@@ -1,20 +1,19 @@
 # rr — Handoff
 
 ## Last Updated
-2026-03-21 — uv workspace refactor complete on branch refactor/uv-workspace
+2026-03-21 — uv workspace refactor merged to master
 
-## Current Branch
-refactor/uv-workspace — DO NOT merge to main until CLAUDE.md and ARCHITECTURE.md are updated
+## What's Done
+- All four commands implemented: `rr init`, `rr file`, `rr reindex`, `rr remove`
+- uv workspace structure: `packages/rr-core/` (business logic) + `packages/rr/` (CLI layer)
+- 74/74 tests passing
+- CLAUDE.md and ARCHITECTURE.md updated for workspace structure
+- README added
 
-## What Was Done Today (2026-03-21)
-- Restructured repo as a uv workspace with two packages:
-  - `packages/rr-core/` — all business logic (init, file, remove, reindex, index, config, git, names)
-  - `packages/rr/` — thin CLI layer only (cli.py), depends on rr-core
-- Root pyproject.toml is now workspace coordinator only
-- 73/73 tests passing (2 new tests added during refactor)
-- Branch pushed to GitHub: refactor/uv-workspace
+## What's Next
+- Review WISHLIST.md for next feature to pick up
+- Check SPEC.md for any unimplemented sections or spec drift
 
-## Still To Do Before Merging Branch
-- [x] Update CLAUDE.md — workspace commands, project layout, code standards, design decisions
-- [x] Create ARCHITECTURE.md — document the rr-core/rr package split and rationale
-- [ ] Merge refactor/uv-workspace → master when ready
+## Open Issues
+- See `observed_errors.md` for real-world usage issues
+- See `WISHLIST.md` for backlog items

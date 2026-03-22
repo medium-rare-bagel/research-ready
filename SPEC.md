@@ -296,6 +296,26 @@ The tool uses Python's built-in `logging` module. The goal is not comprehensive 
 
 ---
 
+## Input Constraints & Validation
+
+These rules apply to filenames in `rr file` and project names in `rr init`.
+
+- **Filenames / project names:**
+  - No spaces
+  - No path separators (`/`, `\`)
+  - No control characters (0x00–0x1F) or null bytes
+  - No OS-reserved names (CON, PRN, AUX, NUL, COM1–9, LPT1–9 — case-insensitive, with or without extension)
+  - Max 255 characters
+- **Descriptions:** Max 280 characters
+- **Destination directory:**
+  - Must be a configured directory from `project.yaml` (`allowed_dirs` check)
+  - Must resolve inside the project root (path traversal guard)
+- **Overwrite:**
+  - Interactive mode: detect and confirm before overwriting
+  - Non-interactive mode: error if destination file already exists (no `--force` flag for beta)
+
+---
+
 ## What This Tool Is NOT
 
 - Not a database. The index is a JSON file and a generated markdown view.

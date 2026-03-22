@@ -104,6 +104,14 @@ Git auto-commit means every filed asset gets stored in git history. For projects
 
 ---
 
+## Developer Experience
+
+### `rr --version` flag
+
+Print the installed version of rr. Useful for catching stale global installs — if the CLI source changes but the global `uv tool install` isn't re-run, the installed binary silently lags behind. A version flag makes mismatches obvious. Could also include a build hash or timestamp for finer-grained detection.
+
+---
+
 ## Infrastructure
 
 ### Git remote support

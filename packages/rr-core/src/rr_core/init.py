@@ -76,10 +76,23 @@ When filing assets with `rr file`, follow these conventions:
 
 ## Tools
 This project was scaffolded with `rr`. Available commands:
-- `rr file <path>` — Rename, move, and index a file. Supports non-interactive mode:
-  `rr file <path> --name <new-name> --dir <directory> --description <desc>`
+- `rr file <path>` — Rename, move, and index a file
 - `rr remove <path>` — Remove a file and update the index
 - `rr reindex` — Rebuild the index from filesystem state
+
+## Non-Interactive Mode (IMPORTANT)
+When using `rr` commands programmatically or from an AI assistant, ALWAYS use non-interactive flags to avoid interactive prompts:
+
+```
+rr file <path> --name <new-name> --dir <directory> --description "<desc>"
+```
+
+All three flags are required for fully non-interactive operation. If any flag is omitted, rr will prompt interactively for the missing value.
+
+Example:
+```
+rr file inbox/report.pdf --name site-assessment-2026-03-22.pdf --dir sources --description "Site assessment report from March field visit"
+```
 """
 
 

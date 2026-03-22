@@ -7,7 +7,7 @@ import click
 
 from rr_core.config import find_project_root, load_config
 from rr_core.file import file_asset
-from rr_core.index import load_index
+from rr_core.index import load_index, resolve_filename
 from rr_core.init import init_project
 from rr_core.names import suggest_filename
 from rr_core.reindex import reindex
@@ -49,7 +49,6 @@ def init_cmd(ctx: click.Context, project_name: str) -> None:
     except FileExistsError:
         click.echo(f"Error: '{project_name}' already exists")
         ctx.exit(1)
-        return
     click.echo(f"Initialized project: {project_name}")
 
 
@@ -108,16 +107,12 @@ def remove_cmd(ctx: click.Context, path: str, yes: bool) -> None:
 
     if not yes:
         index = load_index(project.root / "index.json")
-        entry = next((e for e in index["files"] if e["path"] == path), None)
-        if entry is None and "/" not in path:
-            matches = [e for e in index["files"] if e["filename"] == path]
-            if len(matches) > 1:
-                paths = ", ".join(e["path"] for e in matches)
-                click.echo(f"Error: multiple files match '{path}': {paths} — specify the full path")
-                ctx.exit(1)
-                return
-            if len(matches) == 1:
-                entry = matches[0]
+        try:
+            resolved = resolve_filename(index, path)
+        except ValueError as e:
+            click.echo(f"Error: {e}")
+            ctx.exit(1)
+        entry = next((e for e in index["files"] if e["path"] == resolved), None)
         if entry:
             desc = entry.get("description", "")
             display = entry["path"]

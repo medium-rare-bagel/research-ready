@@ -3,7 +3,7 @@ from datetime import date
 from pathlib import Path
 
 from rr_core.git import git_commit_all, git_has_changes
-from rr_core.index import generate_index_md, load_index, save_index
+from rr_core.index import generate_index_md, load_index, resolve_filename, save_index
 
 logger = logging.getLogger(__name__)
 
@@ -24,15 +24,7 @@ def remove_asset(
         index_md_path = project_root / "index.md"
 
     index = load_index(index_path)
-
-    # Resolve bare filename to a full path via index lookup
-    if not any(e["path"] == file_path for e in index["files"]) and "/" not in file_path:
-        matches = [e["path"] for e in index["files"] if e["filename"] == file_path]
-        if len(matches) > 1:
-            paths = ", ".join(matches)
-            raise ValueError(f"multiple files match '{file_path}': {paths} — specify the full path")
-        if len(matches) == 1:
-            file_path = matches[0]
+    file_path = resolve_filename(index, file_path)
 
     abs_path = project_root / file_path
     on_disk = abs_path.exists()

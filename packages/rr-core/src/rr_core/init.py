@@ -1,3 +1,4 @@
+import copy
 from datetime import date
 from pathlib import Path
 import json
@@ -74,7 +75,7 @@ def init_project(name: str, parent: Path) -> None:
     project_dir = parent / name
     project_dir.mkdir()
 
-    config = DEFAULT_CONFIG.copy()
+    config = copy.deepcopy(DEFAULT_CONFIG)
     config["project"] = {"name": name, "created": None}
     (project_dir / "project.yaml").write_text(yaml.dump(config, sort_keys=False))
 

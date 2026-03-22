@@ -41,3 +41,21 @@ def load_index(path: Path) -> dict:
     if not path.exists():
         return {"last_rebuilt": date.today().isoformat(), "files": []}
     return json.loads(path.read_text())
+
+
+def resolve_filename(index: dict, file_path: str) -> str:
+    """Resolve a bare filename to its full path via index lookup.
+
+    If file_path already contains a slash or matches an existing path entry,
+    returns it unchanged. If it's a bare filename matching exactly one entry,
+    returns that entry's path. Raises ValueError on ambiguous matches.
+    """
+    if "/" in file_path or any(e["path"] == file_path for e in index["files"]):
+        return file_path
+    matches = [e["path"] for e in index["files"] if e["filename"] == file_path]
+    if len(matches) > 1:
+        paths = ", ".join(matches)
+        raise ValueError(f"multiple files match '{file_path}': {paths} — specify the full path")
+    if len(matches) == 1:
+        return matches[0]
+    return file_path

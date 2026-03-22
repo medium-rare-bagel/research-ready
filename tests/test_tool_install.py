@@ -1,6 +1,9 @@
 """Smoke test: rr is installable as a uv tool and its CLI entry point works."""
 
 import subprocess
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def test_rr_cli_entry_point_responds():
@@ -8,7 +11,7 @@ def test_rr_cli_entry_point_responds():
     result = subprocess.run(
         ["uv", "run", "rr", "--help"],
         capture_output=True, text=True,
-        cwd="/Users/imac-homelab/projects/rr",
+        cwd=REPO_ROOT,
     )
     assert result.returncode == 0, f"rr --help failed:\n{result.stderr}"
     assert "Usage" in result.stdout

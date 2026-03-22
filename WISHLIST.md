@@ -32,7 +32,15 @@ Interactive walkthrough that teaches rr's philosophy and discipline by doing. Cr
 
 ### `rr destroy`
 
-Tear down an entire rr project: remove the directory tree, index files, git repo — everything `rr init` created. Requires explicit confirmation (`click.confirm` with project name echo). Currently there's no way to remove a whole project without `rm -rf`, which is hostile to non-technical users. The `rr tutorial` cleanup need highlights this gap, but `rr destroy` is useful independently for any project the user wants to discard.
+Tear down an entire rr project: remove the directory tree, index files, git repo — everything `rr init` created. Requires explicit confirmation (`click.confirm` with project name echo). Currently there's no way to remove a whole project without `rm -rf`, which is hostile to non-technical users. The `rr tutorial` cleanup need highlights this gap, but `rr destroy` is useful independently for any project the user wants to discard. **Beta note:** consider scoping `rr destroy` as tutorial-internal-only initially rather than a general user command, to reduce footgun risk.
+
+### `rr search`
+
+Search descriptions, filenames, and tags in `index.json`. Usage: `rr search <term>`. Case-insensitive substring match across entry fields. For a research tool, being able to find "that PDF about the Costa Rica incident" by searching descriptions is a core workflow. All the data is already in `index.json` — this is a read-only query with no filesystem side effects. Could later support `--tag`, `--dir`, or regex filters.
+
+### Programmatic / non-interactive mode
+
+The entire rr-core extraction exists so that programmatic callers (Claude Code CLI, scripts, future GUI) can use rr without hitting Click's interactive prompts. The missing piece: a way to pass all answers upfront via CLI flags. Example: `rr file document.pdf --name "2026-03-21-report.pdf" --dir sources --description "SOUTHCOM press release"`. When all required values are provided as flags, skip the interactive prompts entirely. When some are missing, prompt only for those. This is the concrete payoff of the rr-core / rr split and should be one of the first things built — without it, rr can't be used as a tool by any automated caller.
 
 ---
 
@@ -61,6 +69,14 @@ Both are spec'd (SPEC.md lines 58-59) but not implemented. `--no-git` also requi
 ### Post-init welcome message
 
 `rr init` currently prints a single line (`Initialized project: {name}`). For a user's first encounter with the tool — or after a break — that's not enough context. Add a brief post-init summary showing what was created (directories, key files) and the main commands (`rr file`, `rr remove`, `rr reindex`). Keep it to 6-8 lines of plain `click.echo` output — no new dependencies. Click's built-in `click.style()` is sufficient for any emphasis needed. Detail the exact output format during roadmap planning. Should also include an Obsidian tip: if the project will live in an Obsidian vault, enable **Settings → Files and Links → Detect all file extensions** so links to non-`.md` files (PDFs, .txt, etc.) resolve correctly.
+
+### Tags end-to-end
+
+Tags exist in the index schema but nothing writes to them and nothing uses them. Full support means: `rr file --tags "source,press-release"` to set tags on filing, `rr edit --tags` to update them later, `rr search --tag source` to filter by tag, and display tags in `index.md`. For OSINT work, tagging files by source type, date range, or topic is a natural workflow. The schema is ready — this is wiring up the read/write paths and surfacing tags in the UI.
+
+### Grouped index view
+
+`index.md` is currently a flat table. Once a project hits 30+ files across multiple directories, it gets unwieldy. Generate the markdown grouped by directory with section headers instead of (or in addition to) the flat table. Small change to `generate_index_md`, high daily-use value.
 
 ### Backup reminder on init
 

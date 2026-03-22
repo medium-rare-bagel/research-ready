@@ -26,9 +26,9 @@ Read-only project overview — "what is this project?" Displays project name, di
 
 Thin wrapper around `git log --oneline` scoped to the project root. Surfaces the provenance record rr is already building without requiring git literacy from collaborators. Good for sharing a project timeline or reviewing what was filed and when.
 
-## Obsidian-compatible link format (OBS-001)
+## ~~Obsidian-compatible link format (OBS-001)~~ — Resolved
 
-Standard markdown links in `index.md` don't open non-markdown files in Obsidian; they create empty new notes instead. Need to decide: wikilinks (`[[path|name]]`), configurable format in `project.yaml`, or dual output. Evaluate during planning session 2026-03-22. See `observed_errors.md` OBS-001 for details.
+Not an rr bug. Obsidian only detects `.md` files by default. Enabling **Settings → Files and Links → Detect all file extensions** makes standard markdown links work for all file types. No code changes needed. See `observed_errors.md` OBS-001. The `rr init` post-init message and `rr tutorial` should mention this setting (see those entries).
 
 ## Git remote support
 
@@ -68,12 +68,13 @@ No validation exists on user-supplied names or values. Project names (`rr init`)
 
 ## Post-init welcome message
 
-`rr init` currently prints a single line (`Initialized project: {name}`). For a user's first encounter with the tool — or after a break — that's not enough context. Add a brief post-init summary showing what was created (directories, key files) and the main commands (`rr file`, `rr remove`, `rr reindex`). Keep it to 6-8 lines of plain `click.echo` output — no new dependencies. Click's built-in `click.style()` is sufficient for any emphasis needed. Detail the exact output format during roadmap planning.
+`rr init` currently prints a single line (`Initialized project: {name}`). For a user's first encounter with the tool — or after a break — that's not enough context. Add a brief post-init summary showing what was created (directories, key files) and the main commands (`rr file`, `rr remove`, `rr reindex`). Keep it to 6-8 lines of plain `click.echo` output — no new dependencies. Click's built-in `click.style()` is sufficient for any emphasis needed. Detail the exact output format during roadmap planning. Should also include an Obsidian tip: if the project will live in an Obsidian vault, enable **Settings → Files and Links → Detect all file extensions** so links to non-`.md` files (PDFs, .txt, etc.) resolve correctly.
 
 ## `rr tutorial`
 
 Interactive walkthrough that teaches rr's philosophy and discipline by doing. Creates a temporary practice project, walks the user through real operations (init, file, inspect, remove, reindex), and cleans up at the end. Built entirely with Click primitives: `click.echo()`/`click.style()` for explanatory text, `click.pause()` to pace sections, `click.confirm()` for gates. Key design decisions:
 - **Show everything inline** — after each step, print the directory tree, cat the index, show the git log. The user never needs to inspect anything themselves.
+- **Obsidian setup tip** — mention that users should enable **Settings → Files and Links → Detect all file extensions** in Obsidian so that links to non-`.md` files work. Natural place for this is right after the init step or in a dedicated "Obsidian integration" section.
 - **Auto-cleanup** — end with `click.confirm("Delete the practice project?")` and `shutil.rmtree()`. No `rm -rf` knowledge required.
 - Sits above the post-init welcome message in scope: the welcome message is "here's what was created," the tutorial is "here's why rr works this way, let's do it together."
 

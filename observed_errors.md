@@ -10,18 +10,16 @@ Resolved entries stay here until after planning, then get cleared.
 ## OBS-001 — Obsidian file links open empty notes instead of actual files
 
 **Discovered:** 2026-03-18
-**Status:** Open
+**Status:** Resolved (2026-03-21)
 **Severity:** Usability — core workflow broken in Obsidian
 
 **What happened:**
-Clicking a file link in `index.md` within Obsidian opens a blank new note instead of opening the actual file. Standard markdown links (`[name](relative/path.pdf)`) don't resolve to non-markdown files in Obsidian.
+Clicking a file link in `index.md` within Obsidian opens a blank new note instead of opening the actual file. Specifically affected `.txt` files — links wouldn't resolve.
 
 **Root cause:**
-Obsidian treats standard markdown links as references to other notes, not as filesystem paths. For non-`.md` files, Obsidian doesn't resolve `[text](path)` links to actual files on disk — it interprets the path as a note name and creates a new empty note.
+Obsidian by default only detects `.md` files. Non-markdown files like `.txt` don't appear in the vault's file explorer or resolve as link targets unless you enable **Settings → Files and Links → Detect all file extensions**. This wasn't an rr bug — it was a vault configuration issue.
 
-**Possible fixes (to evaluate 2026-03-22):**
-1. **Wikilinks** — `[[path/to/file.pdf|display name]]` — native Obsidian format, works reliably for all file types
-2. **Configurable link format** — let `project.yaml` choose between markdown links and wikilinks
-3. **Dual output** — generate both `index.md` (wikilinks for Obsidian) and a second file with standard markdown links
+**Resolution:**
+Toggle on **Detect all file extensions** in Obsidian settings (Settings → Files and Links). After enabling, `.txt` files appear in the vault file explorer and links resolve correctly. Note that non-markdown files won't get full markdown rendering/linking features, but they open and display as expected.
 
-**Workaround:** Open files directly from the file explorer sidebar instead of clicking links in `index.md`.
+**No code changes needed.** The existing standard markdown link format `[name](relative/path.txt)` works correctly once the vault setting is enabled.

@@ -1,7 +1,7 @@
 # rr — Handoff
 
 ## Last Updated
-2026-03-21 — uv workspace refactor merged to master
+2026-03-21 — pythonic code review
 
 ## What's Done
 - All four commands implemented: `rr init`, `rr file`, `rr reindex`, `rr remove`
@@ -9,6 +9,7 @@
 - 74/74 tests passing
 - CLAUDE.md and ARCHITECTURE.md updated for workspace structure
 - README added
+- Pythonic code review (9/10) — four minor fixes: deepcopy for DEFAULT_CONFIG, unreachable return removed, hardcoded test path fixed, bare filename resolution extracted to `resolve_filename()` in index.py
 
 ## What's Next
 - Review WISHLIST.md for next feature to pick up

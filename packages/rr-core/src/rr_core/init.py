@@ -5,6 +5,7 @@ import json
 import yaml
 
 from rr_core.git import git_commit_all, git_init
+from rr_core.validate import validate_name
 
 DEFAULT_CONFIG = {
     "project": {
@@ -97,6 +98,7 @@ rr file inbox/report.pdf --name site-assessment-2026-03-22.pdf --dir sources --d
 
 
 def init_project(name: str, parent: Path) -> None:
+    validate_name(name)
     project_dir = parent / name
     project_dir.mkdir()
 

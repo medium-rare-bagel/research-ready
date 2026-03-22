@@ -15,7 +15,7 @@
 ## Stage 1 — Must-haves (2026-03-22 morning)
 
 1. ~~**Non-interactive / programmatic mode**~~ **DONE** — CLI flags (`--name`, `--dir`, `--description`) on `rr file`. Prompts skipped when any flag provided; sensible defaults for omitted flags. CLAUDE.md template includes AI assistant instructions. 3 tests passing.
-2. **Input validation** — Scoped tight for beta: filename space enforcement, description length limit (280 chars), path traversal guard, overwrite detection. Broader edge cases (null bytes, Windows reserved names) deferred.
+2. ~~**Input validation**~~ **DONE** — `validate.py` module with four functions: `validate_name` (spaces, path separators), `validate_description` (280 chars), `validate_dest_dir` (path traversal), `check_overwrite` (FileExistsError). Wired into `file_asset()` and `init_project()`. CLI catches errors cleanly; interactive mode prompts for overwrite confirmation. 23 new tests, 101 total passing. Broader edge cases (null bytes, Windows reserved names) deferred.
 
 ## Stage 2 — Beta blockers (evaluate after Stage 1)
 

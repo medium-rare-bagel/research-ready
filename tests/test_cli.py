@@ -513,3 +513,102 @@ def test_file_command_uses_default_name_when_accepted(tmp_path, monkeypatch):
 
     assert result.exit_code == 0
     assert (project_root / "sources" / expected_name).exists()
+
+
+def test_cli_file_noninteractive_rejects_spaces_in_name(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "inbox" / "doc.pdf"
+    src.write_bytes(b"%PDF")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["file", "inbox/doc.pdf", "--name", "my report.pdf"])
+
+    assert result.exit_code != 0
+    assert "spaces" in result.output
+
+
+def test_cli_file_noninteractive_rejects_long_description(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "inbox" / "doc.pdf"
+    src.write_bytes(b"%PDF")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, [
+        "file", "inbox/doc.pdf",
+        "--name", "doc.pdf",
+        "--description", "x" * 281,
+    ])
+
+    assert result.exit_code != 0
+    assert "280" in result.output
+
+
+def test_cli_file_noninteractive_errors_on_overwrite(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    (project_root / "sources" / "doc.pdf").write_bytes(b"existing")
+    src = project_root / "inbox" / "doc.pdf"
+    src.write_bytes(b"new")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, [
+        "file", "inbox/doc.pdf", "--name", "doc.pdf", "--dir", "sources",
+    ])
+
+    assert result.exit_code != 0
+    assert "already exists" in result.output
+    assert src.exists()
+
+
+def test_cli_file_interactive_confirms_overwrite(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    (project_root / "sources" / "doc.pdf").write_bytes(b"existing")
+    src = project_root / "inbox" / "doc.pdf"
+    src.write_bytes(b"new")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["file", "inbox/doc.pdf"],
+        input="doc.pdf\nsources\nUpdated doc\ny\n",
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+    assert (project_root / "sources" / "doc.pdf").read_bytes() == b"new"
+
+
+def test_cli_file_interactive_overwrite_declined(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    (project_root / "sources" / "doc.pdf").write_bytes(b"existing")
+    src = project_root / "inbox" / "doc.pdf"
+    src.write_bytes(b"new")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["file", "inbox/doc.pdf"],
+        input="doc.pdf\nsources\nUpdated doc\nn\n",
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+    assert src.exists()
+    assert "Aborted" in result.output
+
+
+def test_cli_init_rejects_project_name_with_spaces(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["init", "my project"])
+
+    assert result.exit_code != 0
+    assert "spaces" in result.output

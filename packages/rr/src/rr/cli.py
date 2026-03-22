@@ -49,6 +49,9 @@ def init_cmd(ctx: click.Context, project_name: str) -> None:
     except FileExistsError:
         click.echo(f"Error: '{project_name}' already exists")
         ctx.exit(1)
+    except ValueError as e:
+        click.echo(f"Error: {e}")
+        ctx.exit(1)
     click.echo(f"Initialized project: {project_name}")
 
 
@@ -97,16 +100,30 @@ def file_cmd(ctx: click.Context, src: Path, name: str | None, dir_: str | None, 
         description = click.prompt("Description", default="")
 
     dest_dir = project.root / dest_dir_name
-    result_path = file_asset(
-        src=src,
-        new_name=new_name,
-        dest_dir=dest_dir,
-        index_path=project.root / "index.json",
-        index_md_path=project.root / "index.md",
-        description=description,
-        project_root=project.root,
-        allowed_dirs=allowed_dirs,
-    )
+
+    allow_overwrite = False
+    if not non_interactive and (dest_dir / new_name).exists():
+        if not click.confirm(f"'{dest_dir_name}/{new_name}' already exists. Overwrite?", default=False):
+            click.echo("Aborted.")
+            return
+        allow_overwrite = True
+
+    try:
+        result_path = file_asset(
+            src=src,
+            new_name=new_name,
+            dest_dir=dest_dir,
+            index_path=project.root / "index.json",
+            index_md_path=project.root / "index.md",
+            description=description,
+            project_root=project.root,
+            allowed_dirs=allowed_dirs,
+            allow_overwrite=allow_overwrite,
+        )
+    except (ValueError, FileExistsError) as e:
+        click.echo(f"Error: {e}")
+        ctx.exit(1)
+        return
     click.echo(f"Filed: {result_path.relative_to(project.root)}")
 
 

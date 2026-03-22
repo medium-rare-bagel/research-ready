@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import pytest
 import yaml
 from rr_core.init import init_project
 
@@ -66,3 +67,8 @@ def test_init_creates_project_yaml(tmp_path: Path) -> None:
     assert config["structure"]["directories"] == [
         "inbox", "sources", "analysis", "output", "shared", "scripts"
     ]
+
+
+def test_init_rejects_project_name_with_spaces(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="spaces"):
+        init_project("my project", tmp_path)

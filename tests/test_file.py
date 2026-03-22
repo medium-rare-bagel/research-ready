@@ -148,3 +148,71 @@ def test_file_destination_not_in_config_raises(tmp_path):
             dest_dir=tmp_path / "secret",
             allowed_dirs=allowed_dirs,
         )
+
+
+def test_file_rejects_filename_with_spaces(tmp_path):
+    (tmp_path / "inbox").mkdir()
+    (tmp_path / "sources").mkdir()
+    src = tmp_path / "inbox" / "doc.pdf"
+    src.write_text("content")
+
+    with pytest.raises(ValueError, match="spaces"):
+        file_asset(src=src, new_name="my report.pdf", dest_dir=tmp_path / "sources")
+
+
+def test_file_rejects_long_description(tmp_path):
+    (tmp_path / "inbox").mkdir()
+    (tmp_path / "sources").mkdir()
+    src = tmp_path / "inbox" / "doc.pdf"
+    src.write_text("content")
+
+    with pytest.raises(ValueError, match="280"):
+        file_asset(
+            src=src,
+            new_name="doc.pdf",
+            dest_dir=tmp_path / "sources",
+            description="x" * 281,
+        )
+
+
+def test_file_rejects_path_traversal(tmp_path):
+    (tmp_path / "inbox").mkdir()
+    src = tmp_path / "inbox" / "doc.pdf"
+    src.write_text("content")
+
+    with pytest.raises(ValueError, match="outside.*project"):
+        file_asset(
+            src=src,
+            new_name="doc.pdf",
+            dest_dir=tmp_path / ".." / "escape",
+            project_root=tmp_path,
+        )
+
+
+def test_file_rejects_overwrite_existing(tmp_path):
+    (tmp_path / "inbox").mkdir()
+    (tmp_path / "sources").mkdir()
+    (tmp_path / "sources" / "doc.pdf").write_text("existing")
+    src = tmp_path / "inbox" / "doc.pdf"
+    src.write_text("new content")
+
+    with pytest.raises(FileExistsError, match="already exists"):
+        file_asset(src=src, new_name="doc.pdf", dest_dir=tmp_path / "sources")
+    assert src.exists()
+
+
+def test_file_allows_overwrite_when_flag_set(tmp_path):
+    (tmp_path / "inbox").mkdir()
+    (tmp_path / "sources").mkdir()
+    (tmp_path / "sources" / "doc.pdf").write_text("existing")
+    src = tmp_path / "inbox" / "doc.pdf"
+    src.write_text("new content")
+
+    result = file_asset(
+        src=src,
+        new_name="doc.pdf",
+        dest_dir=tmp_path / "sources",
+        allow_overwrite=True,
+    )
+    assert result.exists()
+    assert result.read_text() == "new content"

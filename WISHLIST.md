@@ -69,3 +69,14 @@ No validation exists on user-supplied names or values. Project names (`rr init`)
 ## Post-init welcome message
 
 `rr init` currently prints a single line (`Initialized project: {name}`). For a user's first encounter with the tool — or after a break — that's not enough context. Add a brief post-init summary showing what was created (directories, key files) and the main commands (`rr file`, `rr remove`, `rr reindex`). Keep it to 6-8 lines of plain `click.echo` output — no new dependencies. Click's built-in `click.style()` is sufficient for any emphasis needed. Detail the exact output format during roadmap planning.
+
+## `rr tutorial`
+
+Interactive walkthrough that teaches rr's philosophy and discipline by doing. Creates a temporary practice project, walks the user through real operations (init, file, inspect, remove, reindex), and cleans up at the end. Built entirely with Click primitives: `click.echo()`/`click.style()` for explanatory text, `click.pause()` to pace sections, `click.confirm()` for gates. Key design decisions:
+- **Show everything inline** — after each step, print the directory tree, cat the index, show the git log. The user never needs to inspect anything themselves.
+- **Auto-cleanup** — end with `click.confirm("Delete the practice project?")` and `shutil.rmtree()`. No `rm -rf` knowledge required.
+- Sits above the post-init welcome message in scope: the welcome message is "here's what was created," the tutorial is "here's why rr works this way, let's do it together."
+
+## `rr destroy`
+
+Tear down an entire rr project: remove the directory tree, index files, git repo — everything `rr init` created. Requires explicit confirmation (`click.confirm` with project name echo). Currently there's no way to remove a whole project without `rm -rf`, which is hostile to non-technical users. The `rr tutorial` cleanup need highlights this gap, but `rr destroy` is useful independently for any project the user wants to discard.

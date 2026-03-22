@@ -72,17 +72,27 @@ def reindex_cmd(ctx: click.Context) -> None:
 
 @cli.command("file")
 @click.argument("src", type=click.Path(exists=True, path_type=Path))
+@click.option("--name", "name", default=None, help="New filename (skip prompt)")
+@click.option("--dir", "dir_", default=None, help="Destination directory (skip prompt)")
+@click.option("--description", default=None, help="File description (skip prompt)")
 @click.pass_context
-def file_cmd(ctx: click.Context, src: Path) -> None:
+def file_cmd(ctx: click.Context, src: Path, name: str | None, dir_: str | None, description: str | None) -> None:
     project = require_project(ctx)
     allowed_dirs = project.config["structure"]["directories"]
     default_name = suggest_filename(src.name, date.today())
 
-    new_name = click.prompt("New name", default=default_name)
-    if not Path(new_name).suffix and src.suffix:
-        new_name = new_name + src.suffix
-    dest_dir_name = click.prompt("Destination directory", default="sources")
-    description = click.prompt("Description", default="")
+    non_interactive = name is not None or dir_ is not None or description is not None
+
+    if non_interactive:
+        new_name = name if name is not None else default_name
+        dest_dir_name = dir_ if dir_ is not None else "sources"
+        description = description if description is not None else ""
+    else:
+        new_name = click.prompt("New name", default=default_name)
+        if not Path(new_name).suffix and src.suffix:
+            new_name = new_name + src.suffix
+        dest_dir_name = click.prompt("Destination directory", default="sources")
+        description = click.prompt("Description", default="")
 
     dest_dir = project.root / dest_dir_name
     result_path = file_asset(

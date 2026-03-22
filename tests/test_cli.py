@@ -388,6 +388,88 @@ def test_cli_remove_confirmation_ambiguous_bare_filename(tmp_path, monkeypatch):
     assert "multiple files match" in result.output
 
 
+def test_file_noninteractive_all_flags(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "inbox" / "satellite.png"
+    src.write_bytes(b"\x89PNG")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["file", "inbox/satellite.png",
+         "--name", "maxar-site-2026-03-22.png",
+         "--dir", "sources",
+         "--description", "Maxar satellite imagery"],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+    assert (project_root / "sources" / "maxar-site-2026-03-22.png").exists()
+    assert not src.exists()
+
+    index = json.loads((project_root / "index.json").read_text())
+    assert len(index["files"]) == 1
+    entry = index["files"][0]
+    assert entry["filename"] == "maxar-site-2026-03-22.png"
+    assert entry["directory"] == "sources"
+    assert entry["description"] == "Maxar satellite imagery"
+
+    # Should not have prompted — no "New name" in output
+    assert "New name" not in result.output
+
+
+def test_file_noninteractive_name_only(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "inbox" / "doc.pdf"
+    src.write_bytes(b"%PDF")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["file", "inbox/doc.pdf", "--name", "renamed.pdf"],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+    assert (project_root / "sources" / "renamed.pdf").exists()
+
+    index = json.loads((project_root / "index.json").read_text())
+    entry = index["files"][0]
+    assert entry["directory"] == "sources"
+    assert entry["description"] == ""
+    assert "New name" not in result.output
+
+
+def test_file_noninteractive_dir_only(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "inbox" / "notes.txt"
+    src.write_bytes(b"notes")
+    monkeypatch.chdir(project_root)
+
+    expected_name = suggest_filename("notes.txt", date.today())
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["file", "inbox/notes.txt", "--dir", "analysis"],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+    assert (project_root / "analysis" / expected_name).exists()
+
+    index = json.loads((project_root / "index.json").read_text())
+    entry = index["files"][0]
+    assert entry["directory"] == "analysis"
+    assert entry["filename"] == expected_name
+    assert "New name" not in result.output
+
+
 def test_file_command_uses_default_name_when_accepted(tmp_path, monkeypatch):
     init_project("test-proj", tmp_path)
     project_root = tmp_path / "test-proj"

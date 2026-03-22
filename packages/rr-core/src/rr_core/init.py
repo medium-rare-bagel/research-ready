@@ -63,9 +63,21 @@ See `project.yaml` for the directory structure configuration.
 - `scripts/` holds project-specific scripts — use the description to note what each does.
 - Every file operation is auto-committed to git.
 
+## Filing Conventions
+When filing assets with `rr file`, follow these conventions:
+- **Naming:** Use a descriptive slug with date suffix: `descriptive-name-YYYY-MM-DD.ext` (e.g., `maxar-site-alpha-2024-03-15.png`)
+- **Directory:** Choose based on content type:
+  - `sources/` — Research materials, documents, images, data files
+  - `analysis/` — Notes, working documents, findings
+  - `output/` — Deliverables: reports, drafts, visualizations
+  - `shared/` — Materials sent to others (note the recipient in the description)
+  - `scripts/` — Project-specific scripts (note what each does in the description)
+- **Description:** One-line concise summary of the file's content or purpose
+
 ## Tools
 This project was scaffolded with `rr`. Available commands:
-- `rr file <path>` — Rename, move, and index a file
+- `rr file <path>` — Rename, move, and index a file. Supports non-interactive mode:
+  `rr file <path> --name <new-name> --dir <directory> --description <desc>`
 - `rr remove <path>` — Remove a file and update the index
 - `rr reindex` — Rebuild the index from filesystem state
 """

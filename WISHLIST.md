@@ -2,9 +2,29 @@
 
 Feature ideas and future possibilities. Not prioritized, not committed.
 
-## Unindexed file awareness
+## Directory picker for `rr file`
 
-Files saved directly into tracked directories (bypassing `rr file`) are invisible until `rr reindex`. Two options considered: (1) auto-triggered reindex, (2) status reporting (e.g., `rr status` or a note printed after other commands showing count of unindexed files). Leaning toward Option 2 — fits rr's explicit, user-driven design better. Not locked in yet.
+The destination directory prompt is free-text with a hardcoded default of `"sources"`. The user has to type the directory name with no visibility into what's available. Since `allowed_dirs` is already loaded from `project.yaml`, switching to `click.Choice(allowed_dirs)` would give tab-completion and input validation for free — one-line change. For a full interactive arrow-key menu, a dependency like `questionary` would be needed; `click.Choice` is the 80/20 solution.
+
+## `rr edit`
+
+Update metadata on an existing index entry without touching the file itself. Primary use case: changing a description after filing (`rr edit <filename> --description "better description"`). Could also support updating tags once those are actively used. Should match by filename (or path if ambiguous) and modify the entry in `index.json` in place, regenerate `index.md`, and git commit. Needs to handle the case where multiple entries share a filename (different directories) — either require `--dir` to disambiguate or prompt.
+
+## `rr status`
+
+Same mental model as `git status` — "what needs attention?" Scans tracked directories for files not present in `index.json` and lists them with actionable hints (e.g., `run 'rr file <path>' to index`). Strictly read-only — no automatic mutations. Useful for sanity-checking before switching projects or sharing with collaborators. Subsumes the earlier "unindexed file awareness" idea.
+
+## `rr info`
+
+Read-only project overview — "what is this project?" Displays project name, directory structure from `project.yaml`, count of indexed files, and last commit timestamp. Useful for orientation after a break or for onboarding a collaborator. Could also surface index health (entries pointing to missing files).
+
+## Glob support for `rr file`
+
+`rr file downloads/*.pdf` instead of filing one asset at a time. Low implementation cost with Click's existing argument handling; high daily-use payoff on projects with bulk ingest. Needs a decision on how to handle destination directory and description when multiple files are filed at once (prompt per file, single shared destination, or skip descriptions).
+
+## `rr log`
+
+Thin wrapper around `git log --oneline` scoped to the project root. Surfaces the provenance record rr is already building without requiring git literacy from collaborators. Good for sharing a project timeline or reviewing what was filed and when.
 
 ## Obsidian-compatible link format (OBS-001)
 
@@ -41,6 +61,10 @@ The spec schema includes a `modified` field on index entries, but it's not popul
 ## Partial state on git failure
 
 Git operations are the last step in `file_asset`, `remove_asset`, and `reindex`, but filesystem and index changes happen first with no rollback. If a git commit fails (lock contention, disk full, corrupted repo), the file is already moved/deleted and the index already updated — but nothing is committed. `git_commit_all` itself is two subprocess calls (`git add -A` then `git commit`), so a failure between them leaves staged-but-uncommitted changes. Options: try/except with rollback, journaling, or at minimum a clear warning that uncommitted changes remain.
+
+## Input validation
+
+No validation exists on user-supplied names or values. Project names (`rr init`), file names and descriptions (`rr file`), and destination directories all pass through unsanitized. Risks include path traversal (`../../etc`), empty strings, OS-reserved names (`CON`, `NUL`), null bytes, names exceeding filesystem limits (~255 bytes), and shell metacharacters. `project.yaml` is also loaded and trusted without validation. Additionally, `rr file` will silently overwrite an existing file at the destination (`shutil.move` behavior) and append a duplicate index entry — no existence check or confirmation. Specific concern: the destination directory in `rr file` should be explicitly verified to resolve inside the project root (`dest_dir.resolve().is_relative_to(project.root)`). The current `allowed_dirs` check catches traversal attempts by accident (it compares `dest_dir.name` against the list), but there's no intentional guard — a future refactor could easily break that incidental protection. The natural approach is a validation layer in `rr-core` that all entry points call before passing data to business logic. Scope the specific checks during brainstorming.
 
 ## Post-init welcome message
 

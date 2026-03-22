@@ -606,6 +606,48 @@ def test_cli_file_interactive_overwrite_declined(tmp_path, monkeypatch):
     assert "Aborted" in result.output
 
 
+def test_cli_file_interactive_reprompts_on_invalid_name(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "inbox" / "doc.pdf"
+    src.write_bytes(b"%PDF")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    # First name has spaces (invalid), second is valid
+    result = runner.invoke(
+        cli,
+        ["file", "inbox/doc.pdf"],
+        input="bad name.pdf\ngood-name.pdf\nsources\nA description\n",
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+    assert "spaces" in result.output
+    assert (project_root / "sources" / "good-name.pdf").exists()
+
+
+def test_cli_file_interactive_reprompts_on_long_description(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "inbox" / "doc.pdf"
+    src.write_bytes(b"%PDF")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    long_desc = "x" * 281
+    result = runner.invoke(
+        cli,
+        ["file", "inbox/doc.pdf"],
+        input=f"doc.pdf\nsources\n{long_desc}\nShort desc\n",
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+    assert "280" in result.output
+    assert (project_root / "sources" / "doc.pdf").exists()
+
+
 def test_cli_init_rejects_project_name_with_spaces(tmp_path, monkeypatch, runner):
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(cli, ["init", "my project"])

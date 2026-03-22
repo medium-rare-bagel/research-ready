@@ -2,6 +2,8 @@ from pathlib import Path
 
 
 def validate_name(name: str) -> None:
+    if not name:
+        raise ValueError("Name must not be empty")
     if " " in name:
         raise ValueError(f"Name '{name}' must not contain spaces")
     if "/" in name or "\\" in name:

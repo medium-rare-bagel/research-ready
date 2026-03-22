@@ -48,6 +48,15 @@ def test_generate_index_md_produces_one_data_row(tmp_path: Path) -> None:
     assert len(data_rows) == 1
 
 
+def test_add_entry_replaces_existing_entry_with_same_path(tmp_path: Path) -> None:
+    from rr_core.index import add_entry
+    index = {"last_rebuilt": "2026-03-18", "files": []}
+    add_entry(index, filename="report.pdf", directory="sources", description="First version")
+    add_entry(index, filename="report.pdf", directory="sources", description="Updated version")
+    assert len(index["files"]) == 1
+    assert index["files"][0]["description"] == "Updated version"
+
+
 def test_load_index_nonexistent_file_returns_empty_index(tmp_path: Path) -> None:
     result = load_index(tmp_path / "index.json")
     assert result["files"] == []

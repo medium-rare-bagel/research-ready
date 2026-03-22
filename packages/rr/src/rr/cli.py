@@ -8,6 +8,7 @@ import click
 from rr_core.config import find_project_root, load_config
 from rr_core.file import file_asset
 from rr_core.index import load_index, resolve_filename
+from rr_core.validate import validate_description, validate_name
 from rr_core.init import init_project
 from rr_core.names import suggest_filename
 from rr_core.reindex import reindex
@@ -93,11 +94,23 @@ def file_cmd(ctx: click.Context, src: Path, name: str | None, dir_: str | None, 
         dest_dir_name = dir_ if dir_ is not None else "sources"
         description = description if description is not None else ""
     else:
-        new_name = click.prompt("New name", default=default_name)
-        if not Path(new_name).suffix and src.suffix:
-            new_name = new_name + src.suffix
+        while True:
+            new_name = click.prompt("New name", default=default_name)
+            if not Path(new_name).suffix and src.suffix:
+                new_name = new_name + src.suffix
+            try:
+                validate_name(new_name)
+                break
+            except ValueError as e:
+                click.echo(f"Error: {e}")
         dest_dir_name = click.prompt("Destination directory", default="sources")
-        description = click.prompt("Description", default="")
+        while True:
+            description = click.prompt("Description", default="")
+            try:
+                validate_description(description)
+                break
+            except ValueError as e:
+                click.echo(f"Error: {e}")
 
     dest_dir = project.root / dest_dir_name
 

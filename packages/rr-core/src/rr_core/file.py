@@ -1,5 +1,8 @@
+import logging
 import shutil
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 from rr_core.git import git_commit_all
 from rr_core.index import add_entry, generate_index_md, load_index, save_index
@@ -23,6 +26,8 @@ def file_asset(
         raise ValueError(f"'{dest_dir.name}' is not in the project's allowed directories: {allowed_dirs}")
     if project_root is not None:
         validate_dest_dir(dest_dir, project_root)
+    else:
+        logger.warning("project_root not set — path traversal guard bypassed")
     if not allow_overwrite:
         check_overwrite(dest_dir, new_name)
     dest = dest_dir / new_name

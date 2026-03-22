@@ -216,3 +216,48 @@ def test_file_allows_overwrite_when_flag_set(tmp_path):
     )
     assert result.exists()
     assert result.read_text() == "new content"
+
+
+def test_file_overwrite_replaces_index_entry(tmp_path):
+    (tmp_path / "inbox").mkdir()
+    (tmp_path / "sources").mkdir()
+    index_path = tmp_path / "index.json"
+
+    # First file
+    src1 = tmp_path / "inbox" / "doc.pdf"
+    src1.write_text("v1")
+    file_asset(
+        src=src1, new_name="doc.pdf", dest_dir=tmp_path / "sources",
+        index_path=index_path, description="First version",
+    )
+
+    # Overwrite same file
+    src2 = tmp_path / "inbox" / "doc.pdf"
+    src2.write_text("v2")
+    file_asset(
+        src=src2, new_name="doc.pdf", dest_dir=tmp_path / "sources",
+        index_path=index_path, description="Updated version",
+        allow_overwrite=True,
+    )
+
+    import json
+    index = json.loads(index_path.read_text())
+    assert len(index["files"]) == 1
+    assert index["files"][0]["description"] == "Updated version"
+
+
+def test_file_warns_when_project_root_is_none(tmp_path, caplog):
+    import logging
+    (tmp_path / "inbox").mkdir()
+    (tmp_path / "sources").mkdir()
+    src = tmp_path / "inbox" / "doc.pdf"
+    src.write_text("content")
+
+    with caplog.at_level(logging.WARNING):
+        file_asset(
+            src=src,
+            new_name="doc.pdf",
+            dest_dir=tmp_path / "sources",
+            project_root=None,
+        )
+    assert any("project_root" in r.message.lower() for r in caplog.records)

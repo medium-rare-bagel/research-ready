@@ -10,6 +10,11 @@ def test_validate_name_rejects_spaces():
         validate_name("my report.pdf")
 
 
+def test_validate_name_rejects_empty_string():
+    with pytest.raises(ValueError, match="empty"):
+        validate_name("")
+
+
 def test_validate_name_accepts_valid_name():
     validate_name("my-report-2026-03-22.pdf")
 

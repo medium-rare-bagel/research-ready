@@ -470,6 +470,30 @@ def test_file_noninteractive_dir_only(tmp_path, monkeypatch):
     assert "New name" not in result.output
 
 
+def test_file_noninteractive_appends_extension_when_omitted(tmp_path, monkeypatch):
+    init_project("test-proj", tmp_path)
+    project_root = tmp_path / "test-proj"
+    src = project_root / "inbox" / "report.pdf"
+    src.write_bytes(b"%PDF")
+    monkeypatch.chdir(project_root)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["file", "inbox/report.pdf",
+         "--name", "site-assessment-2026-03-22",
+         "--dir", "sources",
+         "--description", "Assessment report"],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+    assert (project_root / "sources" / "site-assessment-2026-03-22.pdf").exists()
+
+    index = json.loads((project_root / "index.json").read_text())
+    assert index["files"][0]["filename"] == "site-assessment-2026-03-22.pdf"
+
+
 def test_file_command_uses_default_name_when_accepted(tmp_path, monkeypatch):
     init_project("test-proj", tmp_path)
     project_root = tmp_path / "test-proj"

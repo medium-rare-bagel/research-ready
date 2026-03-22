@@ -87,7 +87,7 @@ When using `rr` commands programmatically or from an AI assistant, ALWAYS use no
 rr file <path> --name <new-name> --dir <directory> --description "<desc>"
 ```
 
-All three flags are required for fully non-interactive operation. If any flag is omitted, rr will prompt interactively for the missing value.
+If any flag is provided, rr runs non-interactively — omitted flags get sensible defaults (name: auto-generated slug, dir: `sources`, description: empty). If NO flags are provided, rr prompts interactively for all values.
 
 Example:
 ```

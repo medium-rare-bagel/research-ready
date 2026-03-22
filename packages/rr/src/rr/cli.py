@@ -85,6 +85,8 @@ def file_cmd(ctx: click.Context, src: Path, name: str | None, dir_: str | None, 
 
     if non_interactive:
         new_name = name if name is not None else default_name
+        if not Path(new_name).suffix and src.suffix:
+            new_name = new_name + src.suffix
         dest_dir_name = dir_ if dir_ is not None else "sources"
         description = description if description is not None else ""
     else:

@@ -50,6 +50,10 @@ The entire rr-core extraction exists so that programmatic callers (Claude Code C
 
 The destination directory prompt is free-text with a hardcoded default of `"sources"`. The user has to type the directory name with no visibility into what's available. Since `allowed_dirs` is already loaded from `project.yaml`, switching to `click.Choice(allowed_dirs)` would give tab-completion and input validation for free — one-line change. For a full interactive arrow-key menu, a dependency like `questionary` would be needed; `click.Choice` is the 80/20 solution.
 
+### Refile support in `rr file`
+
+When `rr file` is given a source path that's already tracked in `index.json`, it should update the existing entry (changing `directory` and `path`) rather than adding a duplicate. This makes "move file from one project directory to another" a single safe command: `rr file sources/report.docx --dir shared`. Currently, `add_entry` deduplicates by full path, but since the path changes on a refile, the old entry becomes a ghost. Fix: before adding the new entry, check if the source path matches an existing entry and remove it. Commit message could use "Refile:" prefix to distinguish from initial filing. Discovered via real usage — an LLM assistant tried `rr remove` then `rr file` to move a file, which risks data loss if the remove succeeds but the file step fails.
+
 ### Glob support for `rr file`
 
 `rr file downloads/*.pdf` instead of filing one asset at a time. Low implementation cost with Click's existing argument handling; high daily-use payoff on projects with bulk ingest. Needs a decision on how to handle destination directory and description when multiple files are filed at once (prompt per file, single shared destination, or skip descriptions).

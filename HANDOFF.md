@@ -19,6 +19,9 @@
 - **Stage 2 evaluation** — pick beta blockers from candidate list (see ROADMAP.md Stage 2)
 - Check SPEC.md for any unimplemented sections or spec drift
 
+## Maintenance Notes
+- **Generated CLAUDE.md template** lives in `packages/rr-core/src/rr_core/init.py` (`_claude_md()` function). This is the primary way AI assistants learn how to use rr inside a project. Review and update it whenever commands change or new usage patterns are discovered. Last reviewed: 2026-03-23 (added "Moving Files Between Directories" section after observing Claude attempt a dangerous remove-then-file workflow).
+
 ## Open Issues
 - See `observed_errors.md` for real-world usage issues
 - See `WISHLIST.md` for backlog items

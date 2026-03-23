@@ -81,6 +81,14 @@ This project was scaffolded with `rr`. Available commands:
 - `rr remove <path>` — Remove a file and update the index
 - `rr reindex` — Rebuild the index from filesystem state
 
+## Moving Files Between Directories
+To move an already-filed asset to a different directory, just `rr file` it again with the new `--dir`. Do NOT use `rr remove` first — that deletes the file and risks data loss.
+
+Example: move a file from sources/ to shared/:
+```
+rr file sources/report.pdf --dir shared --description "Shared with Emily"
+```
+
 ## Non-Interactive Mode (IMPORTANT)
 When using `rr` commands programmatically or from an AI assistant, ALWAYS use non-interactive flags to avoid interactive prompts:
 

@@ -57,12 +57,35 @@ See `project.yaml` for the directory structure configuration.
 - `project.yaml` — Project structure and configuration.
 
 ## Conventions
-- All scripting in Python. Use `uv` for package management and tooling.
 - The `inbox/` directory is a holding pen for unfiled materials.
 - Filed assets go in `sources/`, `analysis/`, `output/`, `shared/`, or `scripts/`.
 - `shared/` tracks materials sent to others — use the description to note the recipient.
 - `scripts/` holds project-specific scripts — use the description to note what each does.
 - Every file operation is auto-committed to git.
+
+## Python & uv (IMPORTANT)
+
+All scripting in this project uses Python with `uv` for package management, virtual environments, and task running.
+
+**Do NOT:**
+- Use `pip` or `pip install` — uv manages all dependencies
+- Run `python` directly — use `uv run` instead
+- Ignore `.venv/` — it's managed by uv automatically
+
+**Common operations:**
+- `uv init` — Initialize a new script or package
+- `uv add <package>` — Add a dependency (NOT `pip install`)
+- `uv run <command>` — Run a command in the project's virtual environment
+- `uv run pytest` — Run tests (NOT `python -m pytest`)
+- `uv sync` — Sync the virtual environment with `pyproject.toml`
+
+**Example workflow:**
+```
+uv add requests numpy
+uv run python script.py
+```
+
+If you see a `pyproject.toml` in the project, dependencies are already declared. Use `uv sync` then `uv run` — never pip.
 
 ## Filing Conventions
 When filing assets with `rr file`, follow these conventions:

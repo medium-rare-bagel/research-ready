@@ -53,7 +53,22 @@ def init_cmd(ctx: click.Context, project_name: str) -> None:
     except ValueError as e:
         click.echo(f"Error: {e}")
         ctx.exit(1)
-    click.echo(f"Initialized project: {project_name}")
+    project_root = Path.cwd() / project_name
+    config = load_config(project_root)
+    dirs = ", ".join(config["structure"]["directories"])
+    click.echo(f"""\
+Initialized project: {project_name}
+  Directories: {dirs}
+  Key files:   index.json, project.yaml, CLAUDE.md
+
+Quick start:
+  rr file <path>   — rename, move, and index a file
+  rr remove <path> — remove a file and update the index
+  rr reindex       — rebuild the index from disk
+
+Tip: rr uses git for history, not backup. Consider setting up a remote.
+Tip: Using Obsidian? Enable Settings → Files and Links → Detect all file extensions
+""")
 
 
 @cli.command("reindex")

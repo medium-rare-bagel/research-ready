@@ -200,6 +200,8 @@
   },
   "active": "5f06c02aeddb9597",
   "lastOpenFiles": [
+    "packages/rr/src/rr/cli.py.tmp.96700.1774924782761",
+    "tests/test_cli.py.tmp.96700.1774924734812",
     "STAGE2-PLAN.md",
     "packages/rr/src/rr/cli.py.tmp.44368.1774204469833",
     "packages/rr-core/src/rr_core/__pycache__/validate.cpython-312.pyc",
@@ -220,7 +222,6 @@
     "WISHLIST.md",
     "packages/rr/src/rr/cli.py.tmp.34868.1774140646395",
     "tests/test_tool_install.py",
-    "packages/rr/src/rr/cli.py",
     "ARCHITECTURE.md",
     "notes/rr-git-education-notes.md",
     "rr-git-education-notes.md",

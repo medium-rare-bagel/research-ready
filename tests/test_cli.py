@@ -231,6 +231,43 @@ def test_init_works_outside_project(tmp_path, monkeypatch, runner):
     assert result.exit_code == 0
 
 
+def test_init_shows_welcome_with_directories(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["init", "my-project"], catch_exceptions=False)
+    assert result.exit_code == 0
+    assert "sources" in result.output
+    assert "analysis" in result.output
+    assert "inbox" in result.output
+
+
+def test_init_shows_key_files(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["init", "my-project"], catch_exceptions=False)
+    assert "index.json" in result.output
+    assert "project.yaml" in result.output
+    assert "CLAUDE.md" in result.output
+
+
+def test_init_shows_command_summary(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["init", "my-project"], catch_exceptions=False)
+    assert "rr file" in result.output
+    assert "rr remove" in result.output
+    assert "rr reindex" in result.output
+
+
+def test_init_shows_backup_reminder(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["init", "my-project"], catch_exceptions=False)
+    assert "backup" in result.output or "remote" in result.output
+
+
+def test_init_shows_obsidian_tip(tmp_path, monkeypatch, runner):
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["init", "my-project"], catch_exceptions=False)
+    assert "Obsidian" in result.output
+
+
 def test_cli_remove_with_yes_flag(tmp_path, monkeypatch):
     init_project("test-proj", tmp_path)
     project_root = tmp_path / "test-proj"

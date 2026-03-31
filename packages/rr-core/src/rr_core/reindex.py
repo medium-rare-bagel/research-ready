@@ -72,6 +72,7 @@ def reindex(
             "path": f"{dir_name}/{filename}",
             "description": "(no description)",
             "added": added_date,
+            "modified": added_date,
             "tags": [],
         })
         logger.debug("Adding new entry: %s/%s", dir_name, filename)

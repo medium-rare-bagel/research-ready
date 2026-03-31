@@ -5,16 +5,19 @@ from pathlib import Path
 
 def add_entry(index: dict, filename: str, directory: str, description: str) -> None:
     path = f"{directory}/{filename}"
+    today = date.today().isoformat()
     entry = {
         "filename": filename,
         "directory": directory,
         "path": path,
         "description": description,
-        "added": date.today().isoformat(),
+        "added": today,
+        "modified": today,
         "tags": [],
     }
     for i, existing in enumerate(index["files"]):
         if existing["path"] == path:
+            entry["added"] = existing["added"]  # preserve original added date
             index["files"][i] = entry
             return
     index["files"].append(entry)

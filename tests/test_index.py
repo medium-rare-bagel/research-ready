@@ -61,3 +61,32 @@ def test_load_index_nonexistent_file_returns_empty_index(tmp_path: Path) -> None
     result = load_index(tmp_path / "index.json")
     assert result["files"] == []
     assert "last_rebuilt" in result
+
+
+def test_add_entry_includes_modified_field() -> None:
+    from rr_core.index import add_entry
+    index = {"last_rebuilt": "2026-03-30", "files": []}
+    add_entry(index, filename="report.pdf", directory="sources", description="A report")
+    entry = index["files"][0]
+    assert "modified" in entry
+    assert entry["modified"] == entry["added"]
+
+
+def test_add_entry_overwrite_preserves_added_updates_modified() -> None:
+    from rr_core.index import add_entry
+    index = {"last_rebuilt": "2026-03-30", "files": []}
+    # Simulate original entry with a past added date
+    index["files"].append({
+        "filename": "report.pdf",
+        "directory": "sources",
+        "path": "sources/report.pdf",
+        "description": "First version",
+        "added": "2026-01-01",
+        "modified": "2026-01-01",
+        "tags": [],
+    })
+    add_entry(index, filename="report.pdf", directory="sources", description="Updated version")
+    entry = index["files"][0]
+    assert entry["added"] == "2026-01-01"  # preserved
+    assert entry["description"] == "Updated version"
+    assert "modified" in entry

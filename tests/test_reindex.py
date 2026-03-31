@@ -182,3 +182,34 @@ def test_reindex_regenerates_index_md(project):
     reindex(root, config)
     content = (root / "index.md").read_text()
     assert "report.pdf" in content
+
+
+def test_reindex_new_entry_has_modified_field(project):
+    root, config = project
+    (root / "sources" / "paper.pdf").write_bytes(b"%PDF")
+    reindex(root, config)
+    index = load_index(root / "index.json")
+    entry = index["files"][0]
+    assert "modified" in entry
+    assert entry["modified"] == entry["added"]
+
+
+def test_reindex_preserves_existing_modified(project):
+    root, config = project
+    index_path = root / "index.json"
+    index = load_index(index_path)
+    index["files"].append({
+        "filename": "report.pdf",
+        "directory": "sources",
+        "path": "sources/report.pdf",
+        "description": "My report",
+        "added": "2025-01-01",
+        "modified": "2025-06-15",
+        "tags": ["important"],
+    })
+    save_index(index_path, index)
+    (root / "sources" / "report.pdf").write_bytes(b"%PDF")
+    reindex(root, config)
+    new_index = load_index(index_path)
+    entry = new_index["files"][0]
+    assert entry["modified"] == "2025-06-15"  # preserved from original
